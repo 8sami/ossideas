@@ -79,29 +79,29 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   }, [loading, newLoading, trendingLoading, communityLoading]);
 
-  // Infinite scroll observer
+  // Infinite scroll observer - FIXED VERSION
   useEffect(() => {
-    if (loading) return;
+    if (loading || !hasMore) return;
+
+    const currentRef = lastRepositoryElementRef.current;
+    if (!currentRef) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
+          console.log('Intersection detected, loading more...');
           loadMore();
         }
       },
       { threshold: 1.0 }
     );
 
-    if (lastRepositoryElementRef.current) {
-      observer.observe(lastRepositoryElementRef.current);
-    }
+    observer.observe(currentRef);
 
     return () => {
-      if (lastRepositoryElementRef.current) {
-        observer.unobserve(lastRepositoryElementRef.current);
-      }
+      observer.unobserve(currentRef);
     };
-  }, [loading, hasMore, loadMore]);
+  }, [loading, hasMore, loadMore, repositories.length]); // Added repositories.length to trigger re-observation
 
   // Apply search and filters to repositories
   const applyFilters = useCallback(
@@ -238,21 +238,21 @@ const MainContent: React.FC<MainContentProps> = ({
       ? applyFilters(trendingRepositories)
       : trendingRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, trendingRepositories, convertRepositoryToIdea]);
+  }, [searchQuery, filters, trendingRepositories, applyFilters, convertRepositoryToIdea]);
 
   const communityPicks = useMemo(() => {
     const filteredRepos = shouldFilterSection('community')
       ? applyFilters(communityRepositories)
       : communityRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, communityRepositories, convertRepositoryToIdea]);
+  }, [searchQuery, filters, communityRepositories, applyFilters, convertRepositoryToIdea]);
 
   const newArrivals = useMemo(() => {
     const filteredRepos = shouldFilterSection('newArrivals')
       ? applyFilters(newRepositories)
       : newRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, newRepositories, convertRepositoryToIdea]);
+  }, [searchQuery, filters, newRepositories, applyFilters, convertRepositoryToIdea]);
 
   // Handle idea selection - navigate to appropriate detail page
   const handleIdeaSelect = (idea: IdeaData) => {
