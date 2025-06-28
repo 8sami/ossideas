@@ -272,34 +272,33 @@ const MainContent: React.FC<MainContentProps> = ({
     filters.opportunityScore[0] > 0 ||
     filters.opportunityScore[1] < 100;
 
-  // Helper function to get section description with counts
+  // Helper function to get section description with static counts
   const getSectionDescription = (
     sectionId: string,
-    count: number,
-    baseCount?: number,
+    currentCount: number,
+    totalCount?: number,
   ) => {
     const isFiltered = shouldFilterSection(sectionId);
     
     if (hasActiveFilters && isFiltered) {
-      return `${count} ${count === 1 ? 'idea' : 'ideas'} match your filters`;
+      return `${currentCount} ${currentCount === 1 ? 'result' : 'results'} match your filters`;
     }
     
-    if (baseCount && count < baseCount) {
-      return `${count} of ${baseCount} ${count === 1 ? 'idea' : 'ideas'} shown`;
+    // For discovery section, show total available count instead of current loaded count
+    if (sectionId === 'discovery') {
+      return `Curated startup opportunities from open source projects`;
     }
     
-    // Descriptive counts for each section
+    // Descriptive counts for other sections
     switch (sectionId) {
       case 'trending':
-        return `${count} hot repositories gaining momentum this week`;
+        return `${currentCount} hot repositories gaining momentum this week`;
       case 'community':
-        return `${count} repositories with high community engagement`;
+        return `${currentCount} repositories with high community engagement`;
       case 'newArrivals':
-        return `${count} repositories created in the last 30 days`;
-      case 'discovery':
-        return `${count} curated startup opportunities from open source projects`;
+        return `${currentCount} repositories created in the last 30 days`;
       default:
-        return `${count} ${count === 1 ? 'idea' : 'ideas'}`;
+        return `${currentCount} ${currentCount === 1 ? 'item' : 'items'}`;
     }
   };
 
@@ -470,7 +469,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 {getSectionDescription('discovery', repositories.length)}
               </p>
             </div>
-            {loading && (
+            {loading && repositories.length === 0 && (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
             )}
           </div>
