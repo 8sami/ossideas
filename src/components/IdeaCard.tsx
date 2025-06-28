@@ -125,7 +125,7 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
         <div className="flex items-center justify-between text-sm flex-shrink-0">
           <span className="text-gray-500 truncate">License: {idea.license}</span>
           <div className="flex items-center text-orange-500 group-hover:text-orange-600 transition-colors">
-            <span className="text-xs font-medium">View Details</span>
+            <span className="text-xs font-medium text-nowrap">View Details</span>
             <svg
               className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform"
               fill="none"
