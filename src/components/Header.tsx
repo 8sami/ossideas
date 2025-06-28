@@ -159,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Search Bar - Desktop Only on home page */}
             {showSearchAndFilter && (
-              <div className="hidden md:flex flex-1 max-w-2xl mx-4 lg:mx-8 z-[150]">
+        <div className="md:hidden bg-white border-b border-gray-200 sticky top-16 z-40">
                 <div className="relative w-full">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-gray-400" />
