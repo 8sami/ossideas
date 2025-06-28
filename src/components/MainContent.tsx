@@ -10,7 +10,6 @@ import {
   useCommunityPickRepositories,
   Repository,
 } from '../hooks/useRepositories';
-import { useIdeas, convertIdeaToIdeaData } from '../hooks/useIdeas';
 import { useSubmissions } from '../hooks/useSubmissions';
 import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
@@ -55,14 +54,6 @@ const MainContent: React.FC<MainContentProps> = ({
     useTrendingRepositories();
   const { communityRepositories, loading: communityLoading } =
     useCommunityPickRepositories();
-
-  // Ideas hook for AI-generated business ideas
-  const {
-    ideas,
-    loading: ideasLoading,
-    hasMore: ideasHasMore,
-    loadMore: loadMoreIdeas,
-  } = useIdeas();
 
   // Submissions hook to check if user has submitted repositories
   const { submissions } = useSubmissions();
@@ -426,44 +417,6 @@ const MainContent: React.FC<MainContentProps> = ({
               />
             ))}
           </div>
-        </section>
-
-        {/* AI-Generated Business Ideas Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <h2 className="text-2xl font-bold text-gray-900 mr-3">
-                🤖 AI-Generated Ideas
-              </h2>
-            </div>
-            {ideasLoading && (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {ideas.slice(0, 8).map((idea) => {
-              const ideaData = convertIdeaToIdeaData(idea);
-              return (
-                <IdeaCard
-                  key={idea.id}
-                  idea={ideaData}
-                  onClick={() => navigate(`/ideas/${idea.id}`)}
-                />
-              );
-            })}
-          </div>
-
-          {ideasHasMore && (
-            <div className="text-center mt-8">
-              <button
-                onClick={loadMoreIdeas}
-                disabled={ideasLoading}
-                className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                {ideasLoading ? 'Loading...' : 'Load More Ideas'}
-              </button>
-            </div>
-          )}
         </section>
 
         {/* Discovery Section */}
