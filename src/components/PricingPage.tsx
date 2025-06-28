@@ -883,7 +883,6 @@ const PricingPage: React.FC = () => {
                     {loadingPlan === plan.id || subscriptionManagementLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Processing...</span>
                       </>
                     ) : (
                       <>
