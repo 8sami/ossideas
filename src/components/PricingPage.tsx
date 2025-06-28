@@ -870,7 +870,7 @@ const PricingPage: React.FC = () => {
                   <button
                     onClick={() => handleSubscribe(plan)}
                     disabled={loadingPlan === plan.id || subscriptionManagementLoading || (isCurrentUserPlan && !userSubscription?.cancel_at_period_end)}
-                    className={`w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    className={`w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 flex-end ${
                       isCurrentUserPlan && !userSubscription?.cancel_at_period_end
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : plan.popular || isCurrentUserPlan
