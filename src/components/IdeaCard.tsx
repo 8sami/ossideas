@@ -123,7 +123,7 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
 
         {/* License */}
         <div className="flex items-center justify-between text-sm flex-shrink-0">
-          <span className="text-gray-500 text-ellipsis">License: {idea.license}</span>
+          <span className="text-gray-500 text-truncate">License: {idea.license}</span>
           <div className="flex items-center text-orange-500 group-hover:text-orange-600 transition-colors">
             <span className="text-xs font-medium">View Details</span>
             <svg
