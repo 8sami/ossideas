@@ -13,7 +13,6 @@ import {
 import { useSubmissions } from '../hooks/useSubmissions';
 import { useAuth } from '../hooks/useAuth';
 import { Zap } from 'lucide-react';
-import FullScreenLoader from './FullScreenLoader';
 import AuthModal from './AuthModal';
 
 interface MainContentProps {
@@ -44,7 +43,6 @@ const MainContent: React.FC<MainContentProps> = ({
       'trending',
       'community',
       'newArrivals',
-      'personalized',
       'discovery',
     ],
   });
@@ -217,9 +215,8 @@ const MainContent: React.FC<MainContentProps> = ({
     return (filters.appliedSections || []).includes(sectionId);
   };
 
-  // Apply filtering based on section settings - NOW ONLY USING BACKEND DATA
+  // Apply filtering based on section settings
   const trendingIdeas = useMemo(() => {
-    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('trending')
       ? applyFilters(trendingRepositories)
       : trendingRepositories;
@@ -227,7 +224,6 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [searchQuery, filters, trendingRepositories, convertRepositoryToIdea]);
 
   const communityPicks = useMemo(() => {
-    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('community')
       ? applyFilters(communityRepositories)
       : communityRepositories;
@@ -235,7 +231,6 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [searchQuery, filters, communityRepositories, convertRepositoryToIdea]);
 
   const newArrivals = useMemo(() => {
-    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('newArrivals')
       ? applyFilters(newRepositories)
       : newRepositories;
@@ -281,34 +276,17 @@ const MainContent: React.FC<MainContentProps> = ({
     filters.opportunityScore[0] > 0 ||
     filters.opportunityScore[1] < 100;
 
-  // Helper function to get section description with static counts
+  // Helper function to get section description
   const getSectionDescription = (
     sectionId: string,
-    currentCount: number,
-    totalCount?: number,
+    count: number,
   ) => {
     const isFiltered = shouldFilterSection(sectionId);
-    
     if (hasActiveFilters && isFiltered) {
-      return `${currentCount} ${currentCount === 1 ? 'result' : 'results'} match your filters`;
+      return `${count} repositories match your filters`;
     }
     
-    // For discovery section, show total available count instead of current loaded count
-    if (sectionId === 'discovery') {
-      return `Curated startup opportunities from open source projects`;
-    }
-    
-    // Descriptive counts for other sections
-    switch (sectionId) {
-      case 'trending':
-        return `${currentCount} hot repositories gaining momentum this week`;
-      case 'community':
-        return `${currentCount} repositories with high community engagement`;
-      case 'newArrivals':
-        return `${currentCount} repositories created in the last 30 days`;
-      default:
-        return `${currentCount} ${currentCount === 1 ? 'item' : 'items'}`;
-    }
+    return `${count} repositories`;
   };
 
   return (
@@ -391,7 +369,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🔥 Trending Ideas
+                🔥 Trending Repositories
               </h2>
               <p className="text-gray-600">
                 {getSectionDescription('trending', trendingIdeas.length)}
