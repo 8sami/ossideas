@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IdeaCard from './IdeaCard';
 import FilterPanel from './FilterPanel';
@@ -59,6 +59,30 @@ const MainContent: React.FC<MainContentProps> = ({
   const { submissions } = useSubmissions();
 
   const lastRepositoryElementRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (loading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          loadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (lastRepositoryElementRef.current) {
+      observer.observe(lastRepositoryElementRef.current);
+    }
+
+    return () => {
+      if (lastRepositoryElementRef.current) {
+        observer.unobserve(lastRepositoryElementRef.current);
+      }
+    };
+  }, [loading, hasMore, loadMore]);
 
   // Apply search and filters to repositories
   const applyFilters = useCallback(
@@ -248,20 +272,35 @@ const MainContent: React.FC<MainContentProps> = ({
     filters.opportunityScore[0] > 0 ||
     filters.opportunityScore[1] < 100;
 
-  // Helper function to get section description
+  // Helper function to get section description with counts
   const getSectionDescription = (
     sectionId: string,
     count: number,
     baseCount?: number,
   ) => {
     const isFiltered = shouldFilterSection(sectionId);
+    
     if (hasActiveFilters && isFiltered) {
-      return `${count} ideas match your filters`;
+      return `${count} ${count === 1 ? 'idea' : 'ideas'} match your filters`;
     }
+    
     if (baseCount && count < baseCount) {
-      return `${count} of ${baseCount} ideas shown`;
+      return `${count} of ${baseCount} ${count === 1 ? 'idea' : 'ideas'} shown`;
     }
-    return `${count} ideas`;
+    
+    // Descriptive counts for each section
+    switch (sectionId) {
+      case 'trending':
+        return `${count} hot repositories gaining momentum this week`;
+      case 'community':
+        return `${count} repositories with high community engagement`;
+      case 'newArrivals':
+        return `${count} repositories created in the last 30 days`;
+      case 'discovery':
+        return `${count} curated startup opportunities from open source projects`;
+      default:
+        return `${count} ${count === 1 ? 'idea' : 'ideas'}`;
+    }
   };
 
   return (
@@ -292,6 +331,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </div>
           </a>
         </div>
+        
         {/* Submit Repository Section - Only show if user has no submissions */}
         {submissions.length === 0 && (
           <section className="mb-12">
@@ -419,7 +459,7 @@ const MainContent: React.FC<MainContentProps> = ({
           </div>
         </section>
 
-        {/* Discovery Section */}
+        {/* Discovery Section with Infinite Scroll */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -437,14 +477,13 @@ const MainContent: React.FC<MainContentProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {repositories.map((repo, index) => {
+              const idea = convertRepositoryToIdea(repo);
               if (repositories.length === index + 1) {
                 return (
                   <div key={repo.id} ref={lastRepositoryElementRef}>
                     <IdeaCard
-                      idea={convertRepositoryToIdea(repo)}
-                      onClick={() =>
-                        handleIdeaSelect(convertRepositoryToIdea(repo))
-                      }
+                      idea={idea}
+                      onClick={() => handleIdeaSelect(idea)}
                     />
                   </div>
                 );
@@ -452,10 +491,8 @@ const MainContent: React.FC<MainContentProps> = ({
                 return (
                   <IdeaCard
                     key={repo.id}
-                    idea={convertRepositoryToIdea(repo)}
-                    onClick={() =>
-                      handleIdeaSelect(convertRepositoryToIdea(repo))
-                    }
+                    idea={idea}
+                    onClick={() => handleIdeaSelect(idea)}
                   />
                 );
               }
@@ -470,14 +507,18 @@ const MainContent: React.FC<MainContentProps> = ({
             </div>
           )}
 
-          {hasMore && (
+          {/* Loading indicator for infinite scroll */}
+          {loading && repositories.length > 0 && (
             <div className="text-center mt-8">
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                {loading ? 'Loading...' : 'Load More'}
-              </button>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+              <p className="text-gray-600 mt-2">Loading more repositories...</p>
+            </div>
+          )}
+
+          {/* End of results indicator */}
+          {!loading && !hasMore && repositories.length > 0 && (
+            <div className="text-center mt-8">
+              <p className="text-gray-600">You've reached the end! 🎉</p>
             </div>
           )}
         </section>
