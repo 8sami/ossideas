@@ -65,7 +65,7 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({ repository, onClick }) 
   return (
     <div 
       onClick={onClick}
-      className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-orange-200 transition-all duration-300 cursor-pointer"
+      className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 cursor-pointer"
     >
       {/* Card Header with Gradient Background */}
       <div className="h-32 bg-gradient-to-br from-blue-100 via-blue-50 to-gray-50 relative overflow-hidden">
