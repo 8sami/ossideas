@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bookmark, Heart } from 'lucide-react';
-import IdeaCard from './IdeaCard';
+import UnifiedCard from './UnifiedCard';
 import { useSavedIdeas } from '../hooks/useSavedIdeas';
 import { IdeaData } from '../types';
 import FullScreenLoader from './FullScreenLoader';
@@ -77,9 +77,10 @@ const SavedIdeas: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {savedIdeas.map((idea) => (
-              <IdeaCard
+              <UnifiedCard
                 key={idea.id}
-                idea={idea}
+                data={idea}
+                type="idea"
                 onClick={() => handleIdeaSelect(idea)}
               />
             ))}
