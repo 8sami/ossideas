@@ -153,7 +153,7 @@ const RepositoryDetail: React.FC = () => {
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-orange-100 via-orange-50 to-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">dddddddddddddddddd
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               {repository.full_name}
