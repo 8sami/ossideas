@@ -128,15 +128,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-            Close
-          </button>
-        </div>
       </div>
     </div>
   );
