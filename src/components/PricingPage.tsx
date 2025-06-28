@@ -787,7 +787,7 @@ const PricingPage: React.FC = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid flex grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const Icon = plan.icon;
             const currency = plan.stripeProduct?.currency || 'USD';
