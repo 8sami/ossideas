@@ -12,7 +12,7 @@ import {
 } from '../hooks/useRepositories';
 import { useIdeas, convertIdeaToIdeaData } from '../hooks/useIdeas';
 import { useSubmissions } from '../hooks/useSubmissions';
-import { Brain } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
 
 interface MainContentProps {
