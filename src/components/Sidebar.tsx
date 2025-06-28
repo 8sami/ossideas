@@ -152,7 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
         {/* Navigation Items */}
         <nav className="px-2 py-4 h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="space-y-1">
-            {menuItems.map((item) => {
+            {menuItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = isMenuItemActive(item.path);
 
@@ -190,28 +190,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                     </div>
                   </button>
 
-                  {/* Tooltip for closed state - Fixed positioning to prevent overflow */}
+                  {/* Tooltip for closed state - Dynamic positioning */}
                   {!isOpen && (
                     <div
-                      className="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[60]"
+                      className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[60] top-1/2 transform -translate-y-1/2"
                       style={{
-                        left: '72px', // 64px (sidebar width) + 8px (gap)
-                        top: `${
-                          item.id === 'home'
-                            ? '88'
-                            : item.id === 'categories'
-                            ? '136'
-                            : item.id === 'saved-ideas'
-                            ? '184'
-                            : item.id === 'community'
-                            ? '232'
-                            : item.id === 'pricing'
-                            ? '280'
-                            : item.id === 'submit'
-                            ? '328'
-                            : '376'
-                        }px`,
-                        transform: 'translateY(-50%)',
+                        // Use CSS custom properties for dynamic positioning
+                        '--tooltip-offset': '8px',
                       }}>
                       {item.label}
                       {item.premium && (
@@ -220,7 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                         </span>
                       )}
                       {/* Tooltip arrow */}
-                      <div className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
+                      <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
                     </div>
                   )}
                 </div>
