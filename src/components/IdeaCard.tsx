@@ -106,16 +106,16 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
         {/* Categories */}
         <div className="mb-4 flex-1">
           <div className="flex flex-wrap gap-1">
-            {idea.categories.slice(0, 3).map((category, index) => (
+            {idea.categories.slice(0, 2).map((category, index) => (
               <span
                 key={index}
                 className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
                 {category}
               </span>
             ))}
-            {idea.categories.length > 3 && (
+            {idea.categories.length > 2 && (
               <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
-                +{idea.categories.length - 3}
+                +{idea.categories.length - 2}
               </span>
             )}
           </div>
