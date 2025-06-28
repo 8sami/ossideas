@@ -14,6 +14,7 @@ import { useSubmissions } from '../hooks/useSubmissions';
 import { useAuth } from '../hooks/useAuth';
 import { Zap } from 'lucide-react';
 import AuthModal from './AuthModal';
+import FullScreenLoader from './FullScreenLoader';
 
 interface MainContentProps {
   searchQuery: string;
@@ -32,6 +33,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const navigate = useNavigate();
   const { authState } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
     opportunityScore: [0, 100],
@@ -61,6 +63,21 @@ const MainContent: React.FC<MainContentProps> = ({
   const { submissions } = useSubmissions();
 
   const lastRepositoryElementRef = useRef<HTMLDivElement>(null);
+
+  // Handle initial loading state
+  useEffect(() => {
+    // Check if all initial data has loaded
+    const allDataLoaded = !loading && !newLoading && !trendingLoading && !communityLoading;
+    
+    if (allDataLoaded) {
+      // Add a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setInitialLoading(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, newLoading, trendingLoading, communityLoading]);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -303,6 +320,11 @@ const MainContent: React.FC<MainContentProps> = ({
         return `${count} repositories`;
     }
   };
+
+  // Show full screen loader during initial load
+  if (initialLoading) {
+    return <FullScreenLoader message="Loading repositories..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
