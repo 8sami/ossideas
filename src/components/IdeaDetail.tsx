@@ -20,20 +20,29 @@ import {
 } from 'lucide-react';
 import { useIdeaById } from '../hooks/useIdeaById';
 import { useSavedIdeas } from '../hooks/useSavedIdeas';
+import { useAuth } from '../hooks/useAuth';
 import FullScreenLoader from './FullScreenLoader';
 import ShareModal from './ShareModal';
+import AuthModal from './AuthModal';
 
 const IdeaDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { idea, loading, error } = useIdeaById(id);
   const { isIdeaSaved, toggleSaveIdea } = useSavedIdeas();
+  const { authState } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const isSaved = id ? isIdeaSaved(id) : false;
 
   const handleSaveClick = async () => {
+    if (!authState.user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     if (!id) return;
 
     setIsSaving(true);
@@ -350,6 +359,13 @@ const IdeaDetail: React.FC = () => {
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
         title={idea?.title}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="login"
       />
     </div>
   );

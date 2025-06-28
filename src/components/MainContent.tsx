@@ -11,8 +11,10 @@ import {
   Repository,
 } from '../hooks/useRepositories';
 import { useSubmissions } from '../hooks/useSubmissions';
+import { useAuth } from '../hooks/useAuth';
 import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
+import AuthModal from './AuthModal';
 
 interface MainContentProps {
   searchQuery: string;
@@ -29,6 +31,8 @@ const MainContent: React.FC<MainContentProps> = ({
   onFilterToggle,
 }) => {
   const navigate = useNavigate();
+  const { authState } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
     opportunityScore: [0, 100],
@@ -261,6 +265,11 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   };
 
+  // Handle login requirement for save functionality
+  const handleLoginRequired = () => {
+    setAuthModalOpen(true);
+  };
+
   // Check if any filters are active
   const hasActiveFilters =
     searchQuery ||
@@ -399,6 +408,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
+                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -426,6 +436,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
+                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -453,6 +464,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
+                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -474,6 +486,14 @@ const MainContent: React.FC<MainContentProps> = ({
             )}
           </div>
 
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-600">
+                Error loading repositories: {error}
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {repositories.map((repo, index) => {
               const idea = convertRepositoryToIdea(repo);
@@ -483,6 +503,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     <IdeaCard
                       idea={idea}
                       onClick={() => handleIdeaSelect(idea)}
+                      onLoginRequired={handleLoginRequired}
                     />
                   </div>
                 );
@@ -492,19 +513,12 @@ const MainContent: React.FC<MainContentProps> = ({
                     key={repo.id}
                     idea={idea}
                     onClick={() => handleIdeaSelect(idea)}
+                    onLoginRequired={handleLoginRequired}
                   />
                 );
               }
             })}
           </div>
-
-          {error && (
-            <div className="text-center mt-8">
-              <p className="text-red-600">
-                Error loading repositories: {error}
-              </p>
-            </div>
-          )}
 
           {/* Loading indicator for infinite scroll */}
           {loading && repositories.length > 0 && (
@@ -522,6 +536,13 @@ const MainContent: React.FC<MainContentProps> = ({
           )}
         </section>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="login"
+      />
     </div>
   );
 };

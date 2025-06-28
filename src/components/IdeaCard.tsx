@@ -2,19 +2,30 @@ import React, { useState } from 'react';
 import { Heart, ExternalLink, Zap } from 'lucide-react';
 import { IdeaData } from '../types';
 import { useSavedIdeas } from '../hooks/useSavedIdeas';
+import { useAuth } from '../hooks/useAuth';
 
 interface IdeaCardProps {
   idea: IdeaData;
   onClick: () => void;
+  onLoginRequired?: () => void;
 }
 
-const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
+const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, onLoginRequired }) => {
   const { isIdeaSaved, toggleSaveIdea } = useSavedIdeas();
+  const { authState } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const isSaved = isIdeaSaved(idea.id);
 
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!authState.user) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+
     setIsSaving(true);
 
     try {

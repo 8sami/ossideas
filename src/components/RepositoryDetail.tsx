@@ -15,9 +15,11 @@ import {
 import { useRepositoryById } from '../hooks/useRepositoryById';
 import { useIdeas, convertIdeaToIdeaData } from '../hooks/useIdeas';
 import { useSavedIdeas } from '../hooks/useSavedIdeas';
+import { useAuth } from '../hooks/useAuth';
 import IdeaCard from './IdeaCard';
 import FullScreenLoader from './FullScreenLoader';
 import ShareModal from './ShareModal';
+import AuthModal from './AuthModal';
 
 const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,12 +27,19 @@ const RepositoryDetail: React.FC = () => {
   const { repository, loading, error } = useRepositoryById(id);
   const { ideas } = useIdeas();
   const { isIdeaSaved, toggleSaveIdea } = useSavedIdeas();
+  const { authState } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const isSaved = id ? isIdeaSaved(id) : false;
 
   const handleSaveClick = async () => {
+    if (!authState.user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     if (!id) return;
 
     setIsSaving(true);
@@ -343,6 +352,13 @@ const RepositoryDetail: React.FC = () => {
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
         title={repository?.full_name}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="login"
       />
     </div>
   );
