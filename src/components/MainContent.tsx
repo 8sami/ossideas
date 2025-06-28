@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IdeaCard from './IdeaCard';
@@ -79,6 +78,30 @@ const MainContent: React.FC<MainContentProps> = ({
       return () => clearTimeout(timer);
     }
   }, [loading, newLoading, trendingLoading, communityLoading]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (loading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          loadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (lastRepositoryElementRef.current) {
+      observer.observe(lastRepositoryElementRef.current);
+    }
+
+    return () => {
+      if (lastRepositoryElementRef.current) {
+        observer.unobserve(lastRepositoryElementRef.current);
+      }
+    };
+  }, [loading, hasMore, loadMore]);
 
   // Apply search and filters to repositories
   const applyFilters = useCallback(
@@ -215,61 +238,21 @@ const MainContent: React.FC<MainContentProps> = ({
       ? applyFilters(trendingRepositories)
       : trendingRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, trendingRepositories, applyFilters, convertRepositoryToIdea]);
+  }, [searchQuery, filters, trendingRepositories, convertRepositoryToIdea]);
 
   const communityPicks = useMemo(() => {
     const filteredRepos = shouldFilterSection('community')
       ? applyFilters(communityRepositories)
       : communityRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, communityRepositories, applyFilters, convertRepositoryToIdea]);
+  }, [searchQuery, filters, communityRepositories, convertRepositoryToIdea]);
 
   const newArrivals = useMemo(() => {
     const filteredRepos = shouldFilterSection('newArrivals')
       ? applyFilters(newRepositories)
       : newRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, newRepositories, applyFilters, convertRepositoryToIdea]);
-
-  // Apply filters to discovery section repositories
-  const discoveryRepositories = useMemo(() => {
-    console.log('Discovery repositories raw count:', repositories.length);
-    console.log('Should filter discovery section:', shouldFilterSection('discovery'));
-    console.log('Current filters:', filters);
-    console.log('Search query:', searchQuery);
-    
-    const filteredRepos = shouldFilterSection('discovery')
-      ? applyFilters(repositories)
-      : repositories;
-    
-    console.log('Discovery repositories after filtering:', filteredRepos.length);
-    return filteredRepos;
-  }, [repositories, searchQuery, filters, applyFilters, shouldFilterSection]);
-
-  // Infinite scroll observer
-  useEffect(() => {
-    if (loading) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          console.log('Triggering loadMore from intersection observer');
-          loadMore();
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    if (lastRepositoryElementRef.current) {
-      observer.observe(lastRepositoryElementRef.current);
-    }
-
-    return () => {
-      if (lastRepositoryElementRef.current) {
-        observer.unobserve(lastRepositoryElementRef.current);
-      }
-    };
-  }, [loading, hasMore, loadMore]);
+  }, [searchQuery, filters, newRepositories, convertRepositoryToIdea]);
 
   // Handle idea selection - navigate to appropriate detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -510,7 +493,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 🔍 Discover Repositories
               </h2>
               <p className="text-gray-600">
-                {getSectionDescription('discovery', discoveryRepositories.length, repositories.length)}
+                {getSectionDescription('discovery', repositories.length)}
               </p>
             </div>
             {loading && repositories.length === 0 && (
@@ -527,9 +510,9 @@ const MainContent: React.FC<MainContentProps> = ({
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {discoveryRepositories.map((repo, index) => {
+            {repositories.map((repo, index) => {
               const idea = convertRepositoryToIdea(repo);
-              if (discoveryRepositories.length === index + 1) {
+              if (repositories.length === index + 1) {
                 return (
                   <div key={repo.id} ref={lastRepositoryElementRef}>
                     <IdeaCard
