@@ -142,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed left-0 top-0 transition-all duration-300 ease-in-out z-[70] bg-white border-r border-gray-200 ${
+        className={`fixed left-0 top-0 transition-all duration-300 ease-in-out z-[52] bg-white border-r border-gray-200 ${
           isOpen ? 'w-64 h-full' : 'w-16 h-full'
         }`}>
         {/* Header spacer to account for fixed header */}
@@ -214,7 +214,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
 
                     {/* Tooltip for closed state - Dynamic positioning with higher z-index */}
                     {!isOpen && (
-                      <div className="tooltip fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]">
+                      <div className="tooltip fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[52]">
                         {item.label}
                         {item.premium && (
                           <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-500 text-white rounded">
