@@ -787,7 +787,7 @@ const PricingPage: React.FC = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid flex grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const Icon = plan.icon;
             const currency = plan.stripeProduct?.currency || 'USD';
@@ -870,7 +870,7 @@ const PricingPage: React.FC = () => {
                   <button
                     onClick={() => handleSubscribe(plan)}
                     disabled={loadingPlan === plan.id || subscriptionManagementLoading || (isCurrentUserPlan && !userSubscription?.cancel_at_period_end)}
-                    className={`w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 self-end ${
+                    className={`w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 mt-auto ${
                       isCurrentUserPlan && !userSubscription?.cancel_at_period_end
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : plan.popular || isCurrentUserPlan
