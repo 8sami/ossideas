@@ -286,7 +286,7 @@ const MainContent: React.FC<MainContentProps> = ({
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8 pt-4">
+      <div className="max-w-7xl mx-auto px-6 py-8 pt-3">
         {/*Built with bolt */}
         <div className="pb-3">
           <a
