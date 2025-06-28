@@ -30,6 +30,7 @@ const MainContent: React.FC<MainContentProps> = ({
   onFilterToggle,
 }) => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
     opportunityScore: [0, 100],
@@ -59,6 +60,25 @@ const MainContent: React.FC<MainContentProps> = ({
   const { submissions } = useSubmissions();
 
   const lastRepositoryElementRef = useRef<HTMLDivElement>(null);
+
+  // Check if filters are active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      searchQuery.trim() !== '' ||
+      filters.categories.length > 0 ||
+      filters.license.length > 0 ||
+      filters.opportunityScore[0] > 0 ||
+      filters.opportunityScore[1] < 100 ||
+      filters.isNew ||
+      filters.isTrending ||
+      filters.communityPick
+    );
+  }, [searchQuery, filters]);
+
+  // Helper function to check if a section should be filtered
+  const shouldFilterSection = useCallback((sectionId: string) => {
+    return hasActiveFilters && filters.appliedSections.includes(sectionId);
+  }, [hasActiveFilters, filters.appliedSections]);
 
   // Check if initial data is loading (show full screen loader)
   const isInitialLoading = useMemo(() => {
@@ -229,12 +249,6 @@ const MainContent: React.FC<MainContentProps> = ({
       isFromDatabase: false, // These are repository-based ideas, not from ideas table
     }),
     [],
-  );
-
-  // Convert specialized repositories to ideas
-  const newArrivals = useMemo(
-    () => newRepositories.map(convertRepositoryToIdea),
-    [newRepositories, convertRepositoryToIdea],
   );
 
   // Apply filtering based on section settings - ALL FROM REPOSITORIES ONLY
