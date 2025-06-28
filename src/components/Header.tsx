@@ -267,7 +267,7 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Search Bar - Only show on home page and mobile */}
       {showSearchAndFilter && (
-        <div className="md:hidden bg-white border-b border-gray-200 sticky top-16 z-39">
+        <div className="md:hidden bg-white border-b border-gray-200 sticky top-16 z-4">
           <div className="ml-16 px-2 py-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
