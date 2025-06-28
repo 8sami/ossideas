@@ -179,7 +179,7 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({ repository, onClick }) 
 
         {/* Footer */}
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center text-gray-500">
+          <div className="flex items-center text-gray-500">asfsafsfsadsdf
             {repository.license_name ? (
               <>
                 <Code className="h-3 w-3 mr-1" />
