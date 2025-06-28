@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UnifiedCard from './UnifiedCard';
+import IdeaCard from './IdeaCard';
 import FilterPanel from './FilterPanel';
 import { IdeaData, FilterOptions } from '../types';
 import {
@@ -273,11 +273,6 @@ const MainContent: React.FC<MainContentProps> = ({
     return `${count} ideas`;
   };
 
-  // Show loading state for initial load
-  if (loading && repositories.length === 0 && ideas.length === 0) {
-    return <FullScreenLoader message="Loading ideas and repositories..." />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Filter Panel */}
@@ -370,10 +365,9 @@ const MainContent: React.FC<MainContentProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {trendingIdeas.slice(0, 8).map((idea) => (
-              <UnifiedCard
+              <IdeaCard
                 key={idea.id}
-                data={idea}
-                type="idea"
+                idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
               />
             ))}
@@ -398,10 +392,9 @@ const MainContent: React.FC<MainContentProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {communityPicks.slice(0, 8).map((idea) => (
-              <UnifiedCard
+              <IdeaCard
                 key={idea.id}
-                data={idea}
-                type="idea"
+                idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
               />
             ))}
@@ -426,10 +419,9 @@ const MainContent: React.FC<MainContentProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {newArrivals.slice(0, 8).map((idea) => (
-              <UnifiedCard
+              <IdeaCard
                 key={idea.id}
-                data={idea}
-                type="idea"
+                idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
               />
             ))}
@@ -453,10 +445,9 @@ const MainContent: React.FC<MainContentProps> = ({
             {ideas.slice(0, 8).map((idea) => {
               const ideaData = convertIdeaToIdeaData(idea);
               return (
-                <UnifiedCard
+                <IdeaCard
                   key={idea.id}
-                  data={ideaData}
-                  type="idea"
+                  idea={ideaData}
                   onClick={() => navigate(`/ideas/${idea.id}`)}
                 />
               );
@@ -496,20 +487,22 @@ const MainContent: React.FC<MainContentProps> = ({
               if (repositories.length === index + 1) {
                 return (
                   <div key={repo.id} ref={lastRepositoryElementRef}>
-                    <UnifiedCard
-                      data={repo}
-                      type="repository"
-                      onClick={() => navigate(`/repositories/${repo.id}`)}
+                    <IdeaCard
+                      idea={convertRepositoryToIdea(repo)}
+                      onClick={() =>
+                        handleIdeaSelect(convertRepositoryToIdea(repo))
+                      }
                     />
                   </div>
                 );
               } else {
                 return (
-                  <UnifiedCard
+                  <IdeaCard
                     key={repo.id}
-                    data={repo}
-                    type="repository"
-                    onClick={() => navigate(`/repositories/${repo.id}`)}
+                    idea={convertRepositoryToIdea(repo)}
+                    onClick={() =>
+                      handleIdeaSelect(convertRepositoryToIdea(repo))
+                    }
                   />
                 );
               }
