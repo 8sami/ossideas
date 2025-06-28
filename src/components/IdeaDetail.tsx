@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -90,8 +91,8 @@ const IdeaDetail: React.FC = () => {
 
   if (error || !idea) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md mx-auto">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Idea Not Found
@@ -101,7 +102,7 @@ const IdeaDetail: React.FC = () => {
           </p>
           <button
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors min-h-[44px]">
             Back to Home
           </button>
         </div>
@@ -158,22 +159,23 @@ const IdeaDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Updated z-index to be below sidebar overlay */}
+      {/* Header - Mobile optimized */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-16 z-30">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors">
+              className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors min-h-[44px]">
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to Ideas</span>
+              <span className="hidden sm:inline">Back to Ideas</span>
+              <span className="sm:hidden">Back</span>
             </button>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <button
                 onClick={handleSaveClick}
                 disabled={isSaving}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-colors min-h-[44px] ${
                   isSaving
                     ? 'bg-orange-500 text-white opacity-50 cursor-not-allowed'
                     : isSaved
@@ -181,54 +183,54 @@ const IdeaDetail: React.FC = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}>
                 <Heart className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
-                <span>
+                <span className="text-sm sm:text-base">
                   {isSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
                 </span>
               </button>
 
               <button
                 onClick={handleShareClick}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors min-h-[44px]">
                 <Share2 className="h-4 w-4" />
-                <span>Share</span>
+                <span className="text-sm sm:text-base">Share</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-orange-100 via-orange-50 to-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-8">
+      {/* Hero Section - Mobile optimized */}
+      <div className="bg-gradient-to-br from-orange-100 via-orange-50 to-gray-50 py-8 sm:py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-6 sm:mb-8">
             {/* Badges */}
             <div className="flex justify-center flex-wrap gap-2 mb-4">
               {idea.isNew && (
-                <span className="px-3 py-1 text-sm font-medium bg-blue-500 text-white rounded-full">
+                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium bg-blue-500 text-white rounded-full">
                   New
                 </span>
               )}
               {idea.isTrending && (
-                <span className="px-3 py-1 text-sm font-medium bg-red-500 text-white rounded-full">
+                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium bg-red-500 text-white rounded-full">
                   🔥 Trending
                 </span>
               )}
               {idea.communityPick && (
-                <span className="px-3 py-1 text-sm font-medium bg-purple-500 text-white rounded-full">
+                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium bg-purple-500 text-white rounded-full">
                   Community Pick
                 </span>
               )}
             </div>
 
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
               {idea.title}
             </h1>
-            <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 max-w-2xl mx-auto px-2">
               {idea.tagline}
             </p>
 
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            {/* Key Metrics - Mobile optimized grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-2xl mx-auto">
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center justify-center mb-2">
                   <Zap
@@ -238,12 +240,12 @@ const IdeaDetail: React.FC = () => {
                   />
                 </div>
                 <div
-                  className={`text-2xl font-bold ${getScoreColor(
+                  className={`text-xl sm:text-2xl font-bold ${getScoreColor(
                     idea.opportunityScore,
                   )}`}>
                   {idea.opportunityScore}/100
                 </div>
-                <div className="text-sm text-gray-600">Opportunity Score</div>
+                <div className="text-xs sm:text-sm text-gray-600">Opportunity Score</div>
               </div>
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -254,89 +256,89 @@ const IdeaDetail: React.FC = () => {
                     <ExternalLink className="h-6 w-6 text-blue-600" />
                   )}
                 </div>
-                <div className="text-lg font-bold text-gray-900 truncate">
+                <div className="text-sm sm:text-lg font-bold text-gray-900 truncate">
                   {idea.ossProject}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-xs sm:text-sm text-gray-600">
                   {isRepositoryBased ? 'Repository' : 'OSS Project'}
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="bg-white rounded-lg p-4 shadow-sm sm:col-span-1 col-span-1">
                 <div className="flex items-center justify-center mb-2">
                   <Calendar className="h-6 w-6 text-gray-500" />
                 </div>
-                <div className="text-lg font-bold text-gray-900">
+                <div className="text-sm sm:text-lg font-bold text-gray-900">
                   {idea.license}
                 </div>
-                <div className="text-sm text-gray-600">License</div>
+                <div className="text-xs sm:text-sm text-gray-600">License</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Repository Stats (if repository-based) */}
+      {/* Repository Stats (if repository-based) - Mobile optimized */}
       {isRepositoryBased && repositoryStats && (
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
               Repository Stats
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
+                  <Star className="h-4 sm:h-5 w-4 sm:w-5 text-yellow-500" />
                 </div>
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
                   {formatNumber(repositoryStats.stars)}
                 </div>
-                <div className="text-sm text-gray-600">Stars</div>
+                <div className="text-xs sm:text-sm text-gray-600">Stars</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <GitFork className="h-5 w-5 text-blue-500" />
+                  <GitFork className="h-4 sm:h-5 w-4 sm:w-5 text-blue-500" />
                 </div>
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
                   {formatNumber(repositoryStats.forks)}
                 </div>
-                <div className="text-sm text-gray-600">Forks</div>
+                <div className="text-xs sm:text-sm text-gray-600">Forks</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Eye className="h-5 w-5 text-green-500" />
+                  <Eye className="h-4 sm:h-5 w-4 sm:w-5 text-green-500" />
                 </div>
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
                   {formatNumber(repositoryStats.watchers)}
                 </div>
-                <div className="text-sm text-gray-600">Watchers</div>
+                <div className="text-xs sm:text-sm text-gray-600">Watchers</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  <AlertTriangle className="h-4 sm:h-5 w-4 sm:w-5 text-red-500" />
                 </div>
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
                   {formatNumber(repositoryStats.issues)}
                 </div>
-                <div className="text-sm text-gray-600">Issues</div>
+                <div className="text-xs sm:text-sm text-gray-600">Issues</div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Content Sections */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Content Sections - Mobile optimized */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {sections.map((section) => (
-            <div key={section.id} className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="flex items-center mb-4">
-                <section.icon className="h-5 w-5 text-orange-500 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">
+            <div key={section.id} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+              <div className="flex items-center mb-3 sm:mb-4">
+                <section.icon className="h-4 sm:h-5 w-4 sm:w-5 text-orange-500 mr-2 flex-shrink-0" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   {section.title}
                 </h3>
               </div>
-              <div className="text-gray-700 whitespace-pre-line">
+              <div className="text-sm sm:text-base text-gray-700 whitespace-pre-line leading-relaxed">
                 {section.content}
               </div>
             </div>
