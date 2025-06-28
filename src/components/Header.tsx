@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-bold text-xs sm:text-sm">OS</span>
                 </div>
-                <span className="hidden xs:block sm:block">OSSIdeas</span>
+                <span>OSSIdeas</span>
               </button>
             </div>
 
