@@ -114,7 +114,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
               <button
                 onClick={() => handleSocialShare('facebook')}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">
                 <Facebook className="h-5 w-5" />
                 <span className="text-sm font-medium">Facebook</span>
               </button>
