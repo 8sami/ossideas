@@ -1,9 +1,56 @@
 import React from 'react';
-import { Settings as SettingsIcon, Bell, Shield, Palette } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Shield, Palette, LogIn } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const Settings: React.FC = () => {
   const { authState } = useAuth();
+
+  // Show sign-in prompt if user is not authenticated
+  if (!authState.user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+              <SettingsIcon className="h-8 w-8 text-orange-600" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Sign In Required
+            </h2>
+            
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              You need to be signed in to access your account settings and preferences.
+            </p>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => window.history.back()}
+                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
+                <LogIn className="h-5 w-5" />
+                <span>Sign In to Continue</span>
+              </button>
+              
+              <button
+                onClick={() => window.history.back()}
+                className="w-full px-6 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                Go Back
+              </button>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-500">
+                Don't have an account?{' '}
+                <button className="text-orange-600 hover:text-orange-700 font-medium">
+                  Sign up for free
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
