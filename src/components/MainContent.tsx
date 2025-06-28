@@ -280,13 +280,28 @@ const MainContent: React.FC<MainContentProps> = ({
   const getSectionDescription = (
     sectionId: string,
     count: number,
+    baseCount?: number,
   ) => {
     const isFiltered = shouldFilterSection(sectionId);
     if (hasActiveFilters && isFiltered) {
       return `${count} repositories match your filters`;
     }
+    if (baseCount && count < baseCount) {
+      return `${count} of ${baseCount} repositories shown`;
+    }
     
-    return `${count} repositories`;
+    switch (sectionId) {
+      case 'trending':
+        return `${count} hot repositories gaining momentum`;
+      case 'community':
+        return `${count} repositories loved by our community`;
+      case 'newArrivals':
+        return `${count} recently created repositories`;
+      case 'discovery':
+        return `${count} curated repositories from open source projects`;
+      default:
+        return `${count} repositories`;
+    }
   };
 
   return (
