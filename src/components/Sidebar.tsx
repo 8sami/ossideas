@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                   {/* Tooltip for closed state - Dynamic positioning */}
                   {!isOpen && (
                     <div
-                      className="fixed left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[60] top-1/2 transform -translate-y-1/2"
+                      className="relative left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[60] top-1/2 transform -translate-y-1/2"
                       style={{
                         // Use CSS custom properties for dynamic positioning
                         '--tooltip-offset': '8px',
