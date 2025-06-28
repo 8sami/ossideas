@@ -108,7 +108,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               <button
                 onClick={() => handleSocialShare('twitter')}
                 className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-950 transition-colors">
-                <X className="h-5 w-5" />
+                <Twitter className="h-5 w-5" />
                 <span className="text-sm font-medium">Twitter</span>
               </button>
 
