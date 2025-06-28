@@ -117,6 +117,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
     return location.pathname.startsWith(itemPath);
   };
 
+  // Dynamic tooltip positioning function
+  const getTooltipPosition = (buttonElement: HTMLElement) => {
+    const rect = buttonElement.getBoundingClientRect();
+    const sidebarWidth = 64; // 16 * 4 = 64px (w-16)
+    const tooltipGap = 8; // 8px gap between sidebar and tooltip
+    
+    return {
+      left: sidebarWidth + tooltipGap, // Position to the right of the sidebar
+      top: rect.top + (rect.height / 2), // Center vertically with the button
+    };
+  };
+
   return (
     <>
       {/* Overlay - covers everything including sticky headers */}
@@ -152,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
         {/* Navigation Items */}
         <nav className="px-2 py-4 h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="space-y-1">
-            {menuItems.map((item, index) => {
+            {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = isMenuItemActive(item.path);
 
@@ -164,7 +176,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                       isActive
                         ? 'bg-orange-50 text-orange-600 border border-orange-200'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-orange-500'
-                    }`}>
+                    }`}
+                    onMouseEnter={(e) => {
+                      if (!isOpen) {
+                        const tooltip = e.currentTarget.querySelector('.tooltip') as HTMLElement;
+                        if (tooltip) {
+                          const position = getTooltipPosition(e.currentTarget);
+                          tooltip.style.left = `${position.left}px`;
+                          tooltip.style.top = `${position.top}px`;
+                          tooltip.style.transform = 'translateY(-50%)';
+                        }
+                      }
+                    }}>
                     {/* Icon container - fixed position and size */}
                     <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
                       <Icon
@@ -188,25 +211,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                         </span>
                       )}
                     </div>
-                  </button>
 
-                  {/* Tooltip for closed state - Fixed positioning with higher z-index */}
-                  {!isOpen && (
-                    <div
-                      className="fixed left-16 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]"
-                      style={{
-                        top: `${88 + index * 48}px`, // 88px for header + index * 48px for each item
-                      }}>
-                      {item.label}
-                      {item.premium && (
-                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-500 text-white rounded">
-                          Pro
-                        </span>
-                      )}
-                      {/* Tooltip arrow */}
-                      <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
-                    </div>
-                  )}
+                    {/* Tooltip for closed state - Dynamic positioning with higher z-index */}
+                    {!isOpen && (
+                      <div className="tooltip fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]">
+                        {item.label}
+                        {item.premium && (
+                          <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-500 text-white rounded">
+                            Pro
+                          </span>
+                        )}
+                        {/* Tooltip arrow */}
+                        <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
+                      </div>
+                    )}
+                  </button>
                 </div>
               );
             })}
