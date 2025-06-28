@@ -134,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
       {/* Overlay - covers everything including sticky headers */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[100]"
           onClick={onClose}
         />
       )}
