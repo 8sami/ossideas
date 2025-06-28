@@ -796,7 +796,7 @@ const PricingPage: React.FC = () => {
             return (
               <div
                 key={plan.id}
-                className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+                className={`flex flex-col relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
                   isCurrentUserPlan
                     ? 'border-orange-200 ring-4 ring-orange-100'
                     : plan.popular 
@@ -883,7 +883,6 @@ const PricingPage: React.FC = () => {
                     {loadingPlan === plan.id || subscriptionManagementLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Processing...</span>
                       </>
                     ) : (
                       <>

@@ -107,7 +107,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
             <div className="flex space-x-3">
               <button
                 onClick={() => handleSocialShare('twitter')}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-950 transition-colors">
                 <Twitter className="h-5 w-5" />
                 <span className="text-sm font-medium">Twitter</span>
               </button>
@@ -121,21 +121,12 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
               <button
                 onClick={() => handleSocialShare('linkedin')}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-950 transition-colors">
                 <Linkedin className="h-5 w-5" />
                 <span className="text-sm font-medium">LinkedIn</span>
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-            Close
-          </button>
         </div>
       </div>
     </div>

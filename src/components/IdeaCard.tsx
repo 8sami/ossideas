@@ -106,16 +106,16 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
         {/* Categories */}
         <div className="mb-4 flex-1">
           <div className="flex flex-wrap gap-1">
-            {idea.categories.slice(0, 3).map((category, index) => (
+            {idea.categories.slice(0, 2).map((category, index) => (
               <span
                 key={index}
                 className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
                 {category}
               </span>
             ))}
-            {idea.categories.length > 3 && (
+            {idea.categories.length > 2 && (
               <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
-                +{idea.categories.length - 3}
+                +{idea.categories.length - 2}
               </span>
             )}
           </div>
@@ -123,9 +123,9 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick }) => {
 
         {/* License */}
         <div className="flex items-center justify-between text-sm flex-shrink-0">
-          <span className="text-gray-500">License: {idea.license}</span>
+          <span className="text-gray-500 truncate">License: {idea.license}</span>
           <div className="flex items-center text-orange-500 group-hover:text-orange-600 transition-colors">
-            <span className="text-xs font-medium">View Details</span>
+            <span className="text-xs font-medium text-nowrap">View Details</span>
             <svg
               className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform"
               fill="none"

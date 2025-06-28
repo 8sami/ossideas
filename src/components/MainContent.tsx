@@ -12,7 +12,7 @@ import {
 } from '../hooks/useRepositories';
 import { useIdeas, convertIdeaToIdeaData } from '../hooks/useIdeas';
 import { useSubmissions } from '../hooks/useSubmissions';
-import { Brain } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
 
 interface MainContentProps {
@@ -273,11 +273,6 @@ const MainContent: React.FC<MainContentProps> = ({
     return `${count} ideas`;
   };
 
-  // Show full-screen loader for initial loading - MOVED AFTER ALL HOOKS
-  if (loading && repositories.length === 0) {
-    return <FullScreenLoader message="Loading..." />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Filter Panel */}
@@ -291,7 +286,21 @@ const MainContent: React.FC<MainContentProps> = ({
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 pt-4">
+        {/*Built with bolt */}
+        <div className="pb-3">
+          <a
+            href="https://bolt.new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center space-x-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+          >
+            <div className="flex items-center space-x-1 px-5">
+              <Zap className="h-5 w-5 text-orange-100 group-hover:text-white transition-colors" />
+              <span className="text-sm font-bold tracking-wide">BUILT WITH BOLT</span>
+            </div>
+          </a>
+        </div>
         {/* Submit Repository Section - Only show if user has no submissions */}
         {submissions.length === 0 && (
           <section className="mb-12">
@@ -397,7 +406,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🆕 New Arrivals
+                ✨ New Arrivals
               </h2>
               <p className="text-gray-600">
                 {getSectionDescription('newArrivals', newArrivals.length)}
@@ -423,7 +432,6 @@ const MainContent: React.FC<MainContentProps> = ({
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <Brain className="h-6 w-6 text-purple-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900 mr-3">
                 🤖 AI-Generated Ideas
               </h2>
@@ -463,7 +471,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🔍 Discovery
+                🔍 Discover Repositories
               </h2>
               <p className="text-gray-600">
                 {getSectionDescription('discovery', repositories.length)}
