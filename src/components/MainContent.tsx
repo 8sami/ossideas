@@ -273,11 +273,6 @@ const MainContent: React.FC<MainContentProps> = ({
     return `${count} ideas`;
   };
 
-  // Show full-screen loader for initial loading - MOVED AFTER ALL HOOKS
-  if (loading && repositories.length === 0) {
-    return <FullScreenLoader message="Loading..." />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Filter Panel */}
