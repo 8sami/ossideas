@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Github,
+  SettingsIcon,
   Send,
   AlertCircle,
   CheckCircle,
@@ -125,7 +126,7 @@ const SubmitRepositoryForm: React.FC<SubmitRepositoryFormProps> = ({
         <SignInRequired
           title="Sign In Required"
           description="You need to be signed in to submit a repository for idea generation."
-          icon={Github}
+          icon={SettingsIcon}
           onSignInClick={handleSignInClick}
           onGoBack={handleGoBack}
         />
