@@ -397,7 +397,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🆕 New Arrivals
+                ✨ New Arrivals
               </h2>
               <p className="text-gray-600">
                 {getSectionDescription('newArrivals', newArrivals.length)}
