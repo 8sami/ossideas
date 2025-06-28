@@ -190,13 +190,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                     </div>
                   </button>
 
-                  {/* Tooltip for closed state - Dynamic positioning */}
+                  {/* Tooltip for closed state - Fixed positioning with higher z-index */}
                   {!isOpen && (
                     <div
-                      className="relative left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[60] top-1/2 transform -translate-y-1/2"
+                      className="fixed left-20 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]"
                       style={{
-                        // Use CSS custom properties for dynamic positioning
-                        '--tooltip-offset': '8px',
+                        top: `${88 + index * 48}px`, // 88px for header + index * 48px for each item
                       }}>
                       {item.label}
                       {item.premium && (
