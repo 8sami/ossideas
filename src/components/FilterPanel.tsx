@@ -19,10 +19,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   const licenses = ['MIT', 'Apache', 'GPL', 'BSD', 'ISC', 'Other'];
 
   const sections = [
-    { id: 'trending', label: 'Trending Ideas', icon: '🔥' },
+    { id: 'trending', label: 'Trending Repositories', icon: '🔥' },
     { id: 'community', label: 'Community Picks', icon: '👥' },
     { id: 'newArrivals', label: 'New Arrivals', icon: '✨' },
-    { id: 'personalized', label: 'Personalized', icon: '🎯' },
     { id: 'discovery', label: 'Repository Discovery', icon: '🔍' }
   ];
 
@@ -59,7 +58,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
       isNew: false,
       isTrending: false,
       communityPick: false,
-      appliedSections: ['trending', 'community', 'newArrivals', 'personalized', 'discovery']
+      appliedSections: ['trending', 'community', 'newArrivals', 'discovery']
     });
   };
 
@@ -247,8 +246,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                     />
                     <span className="text-lg mr-2">✨</span>
                     <div>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">New Releases</span>
-                      <span className="text-xs text-gray-500">Recently added</span>
+                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">New Repositories</span>
+                      <span className="text-xs text-gray-500">Recently created</span>
                     </div>
                   </label>
                   

@@ -298,7 +298,7 @@ const MainContent: React.FC<MainContentProps> = ({
       case 'newArrivals':
         return `${count} recently created repositories`;
       case 'discovery':
-        return `${count} curated repositories from open source projects`;
+        return `Curated repositories from open source projects`;
       default:
         return `${count} repositories`;
     }
