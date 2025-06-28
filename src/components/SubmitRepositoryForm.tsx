@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import SignInRequired from './SignInRequired';
+import AuthModal from './AuthModal';
 
 interface SubmitRepositoryFormProps {
   onClose?: () => void;
@@ -28,6 +30,19 @@ const SubmitRepositoryForm: React.FC<SubmitRepositoryFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  const handleSignInClick = () => {
+    setAuthModalOpen(true);
+  };
+
+  const handleGoBack = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -106,24 +121,21 @@ const SubmitRepositoryForm: React.FC<SubmitRepositoryFormProps> = ({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Authentication Required
-            </h2>
-            <p className="text-gray-600 mb-6">
-              You must be logged in to submit a repository for idea generation.
-            </p>
-            <button
-              onClick={() => navigate('/')}
-              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-              Back to Home
-            </button>
-          </div>
-        </div>
-      </div>
+      <>
+        <SignInRequired
+          title="Sign In Required"
+          description="You need to be signed in to submit a repository for idea generation."
+          icon={Github}
+          onSignInClick={handleSignInClick}
+          onGoBack={handleGoBack}
+        />
+        
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode="login"
+        />
+      </>
     );
   }
 
