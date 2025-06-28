@@ -11,9 +11,7 @@ import {
   Repository,
 } from '../hooks/useRepositories';
 import { useSubmissions } from '../hooks/useSubmissions';
-import { useAuth } from '../hooks/useAuth';
 import { Zap } from 'lucide-react';
-import AuthModal from './AuthModal';
 import FullScreenLoader from './FullScreenLoader';
 
 interface MainContentProps {
@@ -31,9 +29,6 @@ const MainContent: React.FC<MainContentProps> = ({
   onFilterToggle,
 }) => {
   const navigate = useNavigate();
-  const { authState } = useAuth();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
     opportunityScore: [0, 100],
@@ -45,6 +40,7 @@ const MainContent: React.FC<MainContentProps> = ({
       'trending',
       'community',
       'newArrivals',
+      'personalized',
       'discovery',
     ],
   });
@@ -64,44 +60,29 @@ const MainContent: React.FC<MainContentProps> = ({
 
   const lastRepositoryElementRef = useRef<HTMLDivElement>(null);
 
-  // Handle initial loading state
+  // Infinite scroll observer
   useEffect(() => {
-    // Check if all initial data has loaded
-    const allDataLoaded = !loading && !newLoading && !trendingLoading && !communityLoading;
-    
-    if (allDataLoaded) {
-      // Add a small delay to ensure smooth transition
-      const timer = setTimeout(() => {
-        setInitialLoading(false);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [loading, newLoading, trendingLoading, communityLoading]);
-
-  // Infinite scroll observer - FIXED VERSION
-  useEffect(() => {
-    if (loading || !hasMore) return;
-
-    const currentRef = lastRepositoryElementRef.current;
-    if (!currentRef) return;
+    if (loading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          console.log('Intersection detected, loading more...');
           loadMore();
         }
       },
       { threshold: 1.0 }
     );
 
-    observer.observe(currentRef);
+    if (lastRepositoryElementRef.current) {
+      observer.observe(lastRepositoryElementRef.current);
+    }
 
     return () => {
-      observer.unobserve(currentRef);
+      if (lastRepositoryElementRef.current) {
+        observer.unobserve(lastRepositoryElementRef.current);
+      }
     };
-  }, [loading, hasMore, loadMore, repositories.length]); // Added repositories.length to trigger re-observation
+  }, [loading, hasMore, loadMore]);
 
   // Apply search and filters to repositories
   const applyFilters = useCallback(
@@ -232,27 +213,30 @@ const MainContent: React.FC<MainContentProps> = ({
     return (filters.appliedSections || []).includes(sectionId);
   };
 
-  // Apply filtering based on section settings
+  // Apply filtering based on section settings - NOW ONLY USING BACKEND DATA
   const trendingIdeas = useMemo(() => {
+    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('trending')
       ? applyFilters(trendingRepositories)
       : trendingRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, trendingRepositories, applyFilters, convertRepositoryToIdea]);
+  }, [searchQuery, filters, trendingRepositories, convertRepositoryToIdea]);
 
   const communityPicks = useMemo(() => {
+    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('community')
       ? applyFilters(communityRepositories)
       : communityRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, communityRepositories, applyFilters, convertRepositoryToIdea]);
+  }, [searchQuery, filters, communityRepositories, convertRepositoryToIdea]);
 
   const newArrivals = useMemo(() => {
+    // Apply filters to original repositories first, then convert to ideas
     const filteredRepos = shouldFilterSection('newArrivals')
       ? applyFilters(newRepositories)
       : newRepositories;
     return filteredRepos.map(convertRepositoryToIdea);
-  }, [searchQuery, filters, newRepositories, applyFilters, convertRepositoryToIdea]);
+  }, [searchQuery, filters, newRepositories, convertRepositoryToIdea]);
 
   // Handle idea selection - navigate to appropriate detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -277,11 +261,6 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   };
 
-  // Handle login requirement for save functionality
-  const handleLoginRequired = () => {
-    setAuthModalOpen(true);
-  };
-
   // Check if any filters are active
   const hasActiveFilters =
     searchQuery ||
@@ -293,38 +272,35 @@ const MainContent: React.FC<MainContentProps> = ({
     filters.opportunityScore[0] > 0 ||
     filters.opportunityScore[1] < 100;
 
-  // Helper function to get section description
+  // Helper function to get section description with static counts
   const getSectionDescription = (
     sectionId: string,
-    count: number,
-    baseCount?: number,
+    currentCount: number,
+    totalCount?: number,
   ) => {
     const isFiltered = shouldFilterSection(sectionId);
+    
     if (hasActiveFilters && isFiltered) {
-      return `${count} repositories match your filters`;
-    }
-    if (baseCount && count < baseCount) {
-      return `${count} of ${baseCount} repositories shown`;
+      return `${currentCount} ${currentCount === 1 ? 'result' : 'results'} match your filters`;
     }
     
+    // For discovery section, show total available count instead of current loaded count
+    if (sectionId === 'discovery') {
+      return `Curated startup opportunities from open source projects`;
+    }
+    
+    // Descriptive counts for other sections
     switch (sectionId) {
       case 'trending':
-        return `${count} hot repositories gaining momentum`;
+        return `${currentCount} hot repositories gaining momentum this week`;
       case 'community':
-        return `${count} repositories loved by our community`;
+        return `${currentCount} repositories with high community engagement`;
       case 'newArrivals':
-        return `${count} recently created repositories`;
-      case 'discovery':
-        return `Curated repositories from open source projects`;
+        return `${currentCount} repositories created in the last 30 days`;
       default:
-        return `${count} repositories`;
+        return `${currentCount} ${currentCount === 1 ? 'item' : 'items'}`;
     }
   };
-
-  // Show full screen loader during initial load
-  if (initialLoading) {
-    return <FullScreenLoader message="Loading repositories..." />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -406,7 +382,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🔥 Trending Repositories
+                🔥 Trending Ideas
               </h2>
               <p className="text-gray-600">
                 {getSectionDescription('trending', trendingIdeas.length)}
@@ -423,7 +399,6 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
-                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -451,7 +426,6 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
-                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -479,7 +453,6 @@ const MainContent: React.FC<MainContentProps> = ({
                 key={idea.id}
                 idea={idea}
                 onClick={() => handleIdeaSelect(idea)}
-                onLoginRequired={handleLoginRequired}
               />
             ))}
           </div>
@@ -501,14 +474,6 @@ const MainContent: React.FC<MainContentProps> = ({
             )}
           </div>
 
-          {error && (
-            <div className="text-center py-12">
-              <p className="text-red-600">
-                Error loading repositories: {error}
-              </p>
-            </div>
-          )}
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {repositories.map((repo, index) => {
               const idea = convertRepositoryToIdea(repo);
@@ -518,7 +483,6 @@ const MainContent: React.FC<MainContentProps> = ({
                     <IdeaCard
                       idea={idea}
                       onClick={() => handleIdeaSelect(idea)}
-                      onLoginRequired={handleLoginRequired}
                     />
                   </div>
                 );
@@ -528,12 +492,19 @@ const MainContent: React.FC<MainContentProps> = ({
                     key={repo.id}
                     idea={idea}
                     onClick={() => handleIdeaSelect(idea)}
-                    onLoginRequired={handleLoginRequired}
                   />
                 );
               }
             })}
           </div>
+
+          {error && (
+            <div className="text-center mt-8">
+              <p className="text-red-600">
+                Error loading repositories: {error}
+              </p>
+            </div>
+          )}
 
           {/* Loading indicator for infinite scroll */}
           {loading && repositories.length > 0 && (
@@ -551,13 +522,6 @@ const MainContent: React.FC<MainContentProps> = ({
           )}
         </section>
       </div>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialMode="login"
-      />
     </div>
   );
 };
