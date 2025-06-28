@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                   {/* Tooltip for closed state - Fixed positioning with higher z-index */}
                   {!isOpen && (
                     <div
-                      className="fixed left-10 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]"
+                      className="fixed left-16 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg z-[70]"
                       style={{
                         top: `${88 + index * 48}px`, // 88px for header + index * 48px for each item
                       }}>
