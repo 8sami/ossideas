@@ -794,9 +794,9 @@ const PricingPage: React.FC = () => {
             const isCurrentUserPlan = isCurrentPlan(plan);
             
             return (
-              <div 
+              <div
                 key={plan.id}
-                className={`flex flex-col h-full relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+                className={`flex flex-col relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
                   isCurrentUserPlan
                     ? 'border-orange-200 ring-4 ring-orange-100'
                     : plan.popular 
@@ -870,7 +870,7 @@ const PricingPage: React.FC = () => {
                   <button
                     onClick={() => handleSubscribe(plan)}
                     disabled={loadingPlan === plan.id || subscriptionManagementLoading || (isCurrentUserPlan && !userSubscription?.cancel_at_period_end)}
-                    className={`mt-auto w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    className={`w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 ${
                       isCurrentUserPlan && !userSubscription?.cancel_at_period_end
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : plan.popular || isCurrentUserPlan
