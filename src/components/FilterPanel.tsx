@@ -75,7 +75,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-16 left-16 right-0 bg-white border-b border-gray-200 shadow-lg z-20 max-h-[calc(100vh-4rem)] overflow-y-auto">
+    <div className="fixed top-16 left-16 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
       <div className="mx-auto px-4 sm:px-6 py-4">
         {/* Header Section */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-100">
