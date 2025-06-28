@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, User, Settings, TrendingUp, Plus } from 'lucide-react';
-import UnifiedCard from './UnifiedCard';
+import IdeaCard from './IdeaCard';
 import { IdeaData } from '../types';
 import { User as UserType } from '../types/auth';
 import { mockIdeas } from '../data/mockData';
@@ -167,10 +167,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 {savedIdeas.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {savedIdeas.map((idea) => (
-                      <UnifiedCard
+                      <IdeaCard
                         key={idea.id}
-                        data={idea}
-                        type="idea"
+                        idea={idea}
                         onClick={() => onIdeaSelect(idea)}
                       />
                     ))}
