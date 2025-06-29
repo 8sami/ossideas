@@ -210,9 +210,9 @@ const MainContent: React.FC<MainContentProps> = ({
     [shouldApplyFiltersToSection, searchQuery, filters],
   );
 
-  // Filter ideas for different sections
+  // Trending ideas - top 4 by teardown score
   const trendingIdeas = useMemo(() => {
-    // Simply sort all ideas by overall_teardown_score (highest first)
+    // Sort all ideas by overall_teardown_score (highest first)
     const sortedIdeas = [...convertedIdeas].sort((a, b) => {
       // Get the original idea data to access overall_teardown_score
       const ideaA = ideas.find(idea => idea.id === a.id);
@@ -222,36 +222,31 @@ const MainContent: React.FC<MainContentProps> = ({
       return scoreB - scoreA;
     });
     
-    // Mark the top ideas as trending (for the 'Hot' badge)
-    const markedIdeas = sortedIdeas.map((idea, index) => ({
+    // Take top 4 and mark them as trending
+    const topIdeas = sortedIdeas.slice(0, 4).map(idea => ({
       ...idea,
-      isTrending: index < 4 // Top 4 ideas by score are marked as trending
+      isTrending: true // Explicitly mark as trending for badge display
     }));
     
-    // Apply filters if this section is selected for filtering
-    const filtered = filterIdeasForSection(markedIdeas, 'trending');
-    
-    // Take top 4
-    return filtered.slice(0, 4);
+    // Apply filters if needed
+    return filterIdeasForSection(topIdeas, 'trending');
   }, [convertedIdeas, ideas, filterIdeasForSection]);
 
+  // Community picks - top 4 by repository stars
   const communityPicks = useMemo(() => {
     // Sort all ideas by repository star count (highest first)
     const sortedByStars = [...convertedIdeas].sort(
       (a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0)
     );
     
-    // Mark the top ideas as community picks
-    const markedIdeas = sortedByStars.map((idea, index) => ({
+    // Take top 4 and mark them as community picks
+    const topByStars = sortedByStars.slice(0, 4).map(idea => ({
       ...idea,
-      communityPick: index < 4 // Top 4 ideas by stars are marked as community picks
+      communityPick: true // Explicitly mark as community pick for badge display
     }));
     
-    // Apply filters if this section is selected for filtering
-    const filtered = filterIdeasForSection(markedIdeas, 'community');
-    
-    // Take top 4
-    return filtered.slice(0, 4);
+    // Apply filters if needed
+    return filterIdeasForSection(topByStars, 'community');
   }, [convertedIdeas, filterIdeasForSection]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
