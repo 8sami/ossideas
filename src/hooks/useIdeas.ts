@@ -80,7 +80,7 @@ export const useIdeas = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const buildQuery = useCallback(
-    (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null, signal?: AbortSignal) => {
+    (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
       let query = supabase
         .from('ideas')
         .select(
@@ -115,11 +115,6 @@ export const useIdeas = () => {
       `,
         )
         .order('generated_at', { ascending: false });
-
-      // Add abort signal to the query
-      if (signal) {
-        query = query.abortSignal(signal);
-      }
 
       // Apply idea ID filter if provided (from category/industry filtering)
       if (filteredIdeaIds && filteredIdeaIds.length > 0) {
@@ -165,8 +160,8 @@ export const useIdeas = () => {
 
   const fetchIdeas = useCallback(
     async (page: number = 0, reset: boolean = false) => {
-      // Abort any existing request
-      if (abortControllerRef.current) {
+      // Only abort if we have an existing controller and we're not on initial load
+      if (abortControllerRef.current && initialized) {
         abortControllerRef.current.abort();
       }
 
@@ -175,7 +170,7 @@ export const useIdeas = () => {
       abortControllerRef.current = abortController;
       const { signal } = abortController;
 
-      // Prevent multiple simultaneous requests
+      // Prevent multiple simultaneous requests (except for initial load)
       if (loading && initialized) return;
 
       setLoading(true);
@@ -287,12 +282,18 @@ export const useIdeas = () => {
           return;
         }
 
+        // Build the query without abort signal first
+        const query = buildQuery(page, filters, filteredIdeaIds);
+        
+        // Add abort signal only if we're not on initial load or if initialized
+        const finalQuery = initialized ? query.abortSignal(signal) : query;
+        
         // Now fetch the ideas with all filters applied
-        const { data, error: fetchError } = await buildQuery(page, filters, filteredIdeaIds, signal);
+        const { data, error: fetchError } = await finalQuery;
 
         if (fetchError) {
           // Check if error is due to abort
-          if (signal.aborted) {
+          if (signal.aborted || fetchError.message?.includes('aborted')) {
             return;
           }
           throw fetchError;
@@ -315,7 +316,7 @@ export const useIdeas = () => {
         }
       } catch (err) {
         // Don't set error state for aborted requests
-        if (signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+        if (signal.aborted || (err instanceof Error && (err.name === 'AbortError' || err.message?.includes('aborted')))) {
           return;
         }
         
