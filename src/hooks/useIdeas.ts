@@ -283,7 +283,8 @@ export const useIdeas = () => {
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
-    setInitialized(false); // Reset initialization for new filter
+    // DON'T reset initialized - this was causing the loading screen!
+    // setInitialized(false); // REMOVED THIS LINE
   }, []);
 
   const resetFilters = useCallback(() => {
