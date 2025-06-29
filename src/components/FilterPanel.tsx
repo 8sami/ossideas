@@ -109,20 +109,20 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
 
         {/* Filters Grid */}
         <div className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {/* Categories */}
-            <div className="md:col-span-1 lg:col-span-3">
-              <div className="border border-orange-200 rounded-xl p-4 bg-white">
+            <div className="flex flex-col">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white flex-1 flex flex-col">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <span className="text-lg mr-2">📂</span>
                   Categories & Topics
                 </h4>
                 {categoriesLoading ? (
-                  <div className="flex items-center justify-center py-4">
+                  <div className="flex items-center justify-center py-4 flex-1">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar flex-1">
                     {categories.map((category) => (
                       <label key={category.category_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
                         <div className="flex items-center">
@@ -145,18 +145,18 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
             </div>
 
             {/* Industries */}
-            <div className="md:col-span-1 lg:col-span-3">
-              <div className="border border-orange-200 rounded-xl p-4 bg-white">
+            <div className="flex flex-col">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white flex-1 flex flex-col">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <span className="text-lg mr-2">🏭</span>
                   Industries
                 </h4>
                 {industriesLoading ? (
-                  <div className="flex items-center justify-center py-4">
+                  <div className="flex items-center justify-center py-4 flex-1">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar flex-1">
                     {industries.map((industry) => (
                       <label key={industry.industry_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
                         <div className="flex items-center">
@@ -178,15 +178,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
               </div>
             </div>
 
-            {/* Opportunity Score & License */}
-            <div className="md:col-span-2 lg:col-span-3 space-y-4">
-              {/* Opportunity Score */}
-              <div className="border border-orange-200 rounded-xl p-4 bg-white">
+            {/* Opportunity Score */}
+            <div className="flex flex-col">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white flex-1 flex flex-col">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <span className="text-lg mr-2">⚡</span>
                   Opportunity Score
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-600 bg-gray-50 px-2 py-1 rounded">{filters.opportunityScore[0]}</span>
                     <span className="text-xs text-gray-500">to</span>
@@ -218,19 +217,21 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* License */}
-              <div className="border border-orange-200 rounded-xl p-4 bg-white">
+            {/* License */}
+            <div className="flex flex-col">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white flex-1 flex flex-col">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <span className="text-lg mr-2">📄</span>
                   License Type
                 </h4>
                 {licensesLoading ? (
-                  <div className="flex items-center justify-center py-4">
+                  <div className="flex items-center justify-center py-4 flex-1">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto flex-1">
                     {licenses.slice(0, 10).map((license) => (
                       <label key={license.license_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
                         <div className="flex items-center">

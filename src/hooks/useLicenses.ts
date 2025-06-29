@@ -8,10 +8,13 @@ export interface License {
 
 export const useLicenses = () => {
   const [licenses, setLicenses] = useState<License[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchLicenses = async () => {
+    if (initialized) return; // Don't fetch if already initialized
+    
     setLoading(true);
     setError(null);
 
@@ -48,6 +51,7 @@ export const useLicenses = () => {
         .sort((a, b) => b.idea_count - a.idea_count);
 
       setLicenses(licenseArray);
+      setInitialized(true);
     } catch (err) {
       console.error('Error fetching licenses:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch licenses');
@@ -64,6 +68,9 @@ export const useLicenses = () => {
     licenses,
     loading,
     error,
-    refetch: fetchLicenses,
+    refetch: () => {
+      setInitialized(false);
+      fetchLicenses();
+    },
   };
 };

@@ -8,10 +8,13 @@ export interface Industry {
 
 export const useIndustries = () => {
   const [industries, setIndustries] = useState<Industry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchIndustries = async () => {
+    if (initialized) return; // Don't fetch if already initialized
+    
     setLoading(true);
     setError(null);
 
@@ -26,6 +29,7 @@ export const useIndustries = () => {
       }
 
       setIndustries(data || []);
+      setInitialized(true);
     } catch (err) {
       console.error('Error fetching industries:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch industries');
@@ -42,6 +46,9 @@ export const useIndustries = () => {
     industries,
     loading,
     error,
-    refetch: fetchIndustries,
+    refetch: () => {
+      setInitialized(false);
+      fetchIndustries();
+    },
   };
 };
