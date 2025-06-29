@@ -18,17 +18,14 @@ export interface IdeaData {
   isTrending?: boolean;
   communityPick?: boolean;
   isFromDatabase?: boolean;
-  generatedAt?: string;
-  repositoryStargazersCount?: number;
-  industries?: string[];
 }
 
 export interface FilterOptions {
   categories: string[];
-  industries: string[];
   opportunityScore: [number, number];
   license: string[];
   isNew: boolean;
   isTrending: boolean;
   communityPick: boolean;
+  appliedSections?: string[];
 }
