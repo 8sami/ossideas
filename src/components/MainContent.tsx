@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import IdeaCard from './IdeaCard';
 import FilterPanel from './FilterPanel';
 import { IdeaData, FilterOptions } from '../types';
-import { useIdeas, IdeaFilters } from '../hooks/useIdeas';
+import { useIdeas, IdeaFilters, convertIdeaToIdeaData } from '../hooks/useIdeas';
 import { useSubmissions } from '../hooks/useSubmissions';
 import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
@@ -34,7 +34,7 @@ const MainContent: React.FC<MainContentProps> = ({
     isNew: false,
     isTrending: false,
     communityPick: false,
-    appliedSections: ['trending', 'community', 'newArrivals', 'discovery'],
+    appliedSections: ['trending', 'community', 'discovery'],
   });
 
   // Use the ideas hook for all data
@@ -52,6 +52,11 @@ const MainContent: React.FC<MainContentProps> = ({
   const { submissions } = useSubmissions();
 
   const lastIdeaElementRef = useRef<HTMLDivElement>(null);
+
+  // Convert ideas to IdeaData format
+  const convertedIdeas = useMemo(() => {
+    return ideas.map(convertIdeaToIdeaData);
+  }, [ideas]);
 
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
@@ -115,30 +120,34 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
+    let filtered = convertedIdeas.filter((idea) => idea.isTrending);
     if (shouldFilterSection('trending')) {
-      return ideas.filter((idea) => idea.isTrending);
+      // Apply additional filters if needed
     }
-    return ideas.filter((idea) => idea.isTrending);
-  }, [ideas, shouldFilterSection]);
+    // Sort by opportunity score (highest first) and take top 4
+    return filtered
+      .sort((a, b) => b.opportunityScore - a.opportunityScore)
+      .slice(0, 4);
+  }, [convertedIdeas, shouldFilterSection]);
 
   const communityPicks = useMemo(() => {
+    let filtered = convertedIdeas.filter((idea) => idea.communityPick);
     if (shouldFilterSection('community')) {
-      return ideas.filter((idea) => idea.communityPick);
+      // Apply additional filters if needed
     }
-    return ideas.filter((idea) => idea.communityPick);
-  }, [ideas, shouldFilterSection]);
+    // Sort by repository stars (highest first) and take top 4
+    return filtered
+      .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
+      .slice(0, 4);
+  }, [convertedIdeas, shouldFilterSection]);
 
-  const newArrivals = useMemo(() => {
-    if (shouldFilterSection('newArrivals')) {
-      return ideas.filter((idea) => idea.isNew);
-    }
-    return ideas.filter((idea) => idea.isNew);
-  }, [ideas, shouldFilterSection]);
-
-  // Discovery section - all ideas
+  // Discovery section - all ideas sorted by generated date (newest first)
   const discoveryIdeas = useMemo(() => {
-    return ideas;
-  }, [ideas]);
+    return convertedIdeas.sort((a, b) => {
+      if (!a.generatedAt || !b.generatedAt) return 0;
+      return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
+    });
+  }, [convertedIdeas]);
 
   // Handle idea selection - navigate to idea detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -161,8 +170,6 @@ const MainContent: React.FC<MainContentProps> = ({
         return `${currentCount} trending ideas with high engagement`;
       case 'community':
         return `${currentCount} community favorites with strong adoption`;
-      case 'newArrivals':
-        return `${currentCount} ideas created in the last 30 days`;
       case 'discovery':
         return `Curated startup opportunities from open source projects`;
       default:
@@ -176,7 +183,7 @@ const MainContent: React.FC<MainContentProps> = ({
   }
 
   // Show error state if there's an error and no data
-  if (error && ideas.length === 0 && !loading) {
+  if (error && convertedIdeas.length === 0 && !loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -276,7 +283,7 @@ const MainContent: React.FC<MainContentProps> = ({
         {/* Content Sections - Only show if initialized */}
         {initialized && (
           <>
-            {/* Trending Ideas Section */}
+            {/* Trending Ideas Section - Show 4 items sorted by highest teardown score */}
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -290,7 +297,7 @@ const MainContent: React.FC<MainContentProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {trendingIdeas.slice(0, 8).map((idea) => (
+                {trendingIdeas.map((idea) => (
                   <IdeaCard
                     key={idea.id}
                     idea={idea}
@@ -301,7 +308,7 @@ const MainContent: React.FC<MainContentProps> = ({
               </div>
             </section>
 
-            {/* Community Picks Section */}
+            {/* Community Picks Section - Show 4 items sorted by most stars */}
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -315,7 +322,7 @@ const MainContent: React.FC<MainContentProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {communityPicks.slice(0, 8).map((idea) => (
+                {communityPicks.map((idea) => (
                   <IdeaCard
                     key={idea.id}
                     idea={idea}
@@ -326,32 +333,7 @@ const MainContent: React.FC<MainContentProps> = ({
               </div>
             </section>
 
-            {/* New Arrivals Section */}
-            <section className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    ✨ New Arrivals
-                  </h2>
-                  <p className="text-gray-600">
-                    {getSectionDescription('newArrivals', newArrivals.length)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {newArrivals.slice(0, 8).map((idea) => (
-                  <IdeaCard
-                    key={idea.id}
-                    idea={idea}
-                    onClick={() => handleIdeaSelect(idea)}
-                    onRegisterClick={onRegisterClick}
-                  />
-                ))}
-              </div>
-            </section>
-
-            {/* Discovery Section with Infinite Scroll */}
+            {/* Discovery Section with Infinite Scroll - Sorted by created date (newest first) */}
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -362,7 +344,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     {getSectionDescription('discovery', discoveryIdeas.length)}
                   </p>
                 </div>
-                {loading && ideas.length > 0 && (
+                {loading && convertedIdeas.length > 0 && (
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                 )}
               </div>
@@ -399,7 +381,7 @@ const MainContent: React.FC<MainContentProps> = ({
               )}
 
               {/* Loading indicator for infinite scroll */}
-              {loading && ideas.length > 0 && (
+              {loading && convertedIdeas.length > 0 && (
                 <div className="text-center mt-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
                   <p className="text-gray-600 mt-2">Loading more ideas...</p>
@@ -407,7 +389,7 @@ const MainContent: React.FC<MainContentProps> = ({
               )}
 
               {/* End of results indicator */}
-              {!loading && !hasMore && ideas.length > 0 && (
+              {!loading && !hasMore && convertedIdeas.length > 0 && (
                 <div className="text-center mt-8">
                   <p className="text-gray-600">You've reached the end! 🎉</p>
                 </div>
@@ -417,7 +399,7 @@ const MainContent: React.FC<MainContentProps> = ({
         )}
 
         {/* Empty state - only show if initialized and no data */}
-        {initialized && ideas.length === 0 && !loading && !error && (
+        {initialized && convertedIdeas.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <Zap className="h-12 w-12 text-gray-400" />

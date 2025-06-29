@@ -20,10 +20,13 @@ export interface Idea {
     description: string | null;
     stargazers_count: number;
     forks_count: number;
+    watchers_count: number;
     topics: string[] | null;
     license_name: string | null;
     readme_content: string | null;
     languages: Record<string, number>;
+    created_at_github: string | null;
+    last_commit_at: string | null;
   };
   analysis_results?: Array<{
     id: string;
@@ -79,10 +82,13 @@ export const useIdeas = () => {
           description,
           stargazers_count,
           forks_count,
+          watchers_count,
           topics,
           license_name,
           readme_content,
-          languages
+          languages,
+          created_at_github,
+          last_commit_at
         ),
         analysis_results(
           id,
@@ -98,7 +104,7 @@ export const useIdeas = () => {
         )
       `,
         )
-        .order('overall_teardown_score', { ascending: false })
+        .order('generated_at', { ascending: false })
         .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
 
       // Apply filters
@@ -279,6 +285,25 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
         'Market saturation',
       ];
 
+  // Determine if repository is new (created within last 30 days)
+  const isNew = idea.repository?.created_at_github
+    ? new Date(idea.repository.created_at_github) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    : false;
+
+  // Determine if repository is trending (1000+ stars and recent activity within 7 days)
+  const isTrending = idea.repository
+    ? idea.repository.stargazers_count >= 1000 &&
+      idea.repository.last_commit_at &&
+      new Date(idea.repository.last_commit_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    : false;
+
+  // Determine if repository is community pick (500+ stars and high engagement ratio)
+  const communityPick = idea.repository
+    ? idea.repository.stargazers_count >= 500 &&
+      (idea.repository.forks_count + idea.repository.watchers_count) / 
+      Math.max(idea.repository.stargazers_count, 1) > 0.1
+    : false;
+
   return {
     id: idea.id,
     title: idea.title,
@@ -298,9 +323,11 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
     competitiveAdvantage: competitiveAdvantages,
     risks,
     isSaved: false,
-    isNew: false, // Ideas are not "new" in the same sense as repositories
-    isTrending: false, // Ideas are not "trending" in the same sense as repositories
-    communityPick: false, // Ideas are not "community picks" in the same sense as repositories
+    isNew,
+    isTrending,
+    communityPick,
     isFromDatabase: true, // These ideas come from the ideas table
+    generatedAt: idea.generated_at,
+    repositoryStargazersCount: idea.repository?.stargazers_count || 0,
   };
 };

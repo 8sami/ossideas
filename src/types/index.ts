@@ -18,6 +18,8 @@ export interface IdeaData {
   isTrending?: boolean;
   communityPick?: boolean;
   isFromDatabase?: boolean;
+  generatedAt?: string;
+  repositoryStargazersCount?: number;
 }
 
 export interface FilterOptions {

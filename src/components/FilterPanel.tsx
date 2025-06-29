@@ -19,10 +19,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   const licenses = ['MIT', 'Apache', 'GPL', 'BSD', 'ISC', 'Other'];
 
   const sections = [
-    { id: 'trending', label: 'Trending Repositories', icon: '🔥' },
+    { id: 'trending', label: 'Trending Ideas', icon: '🔥' },
     { id: 'community', label: 'Community Picks', icon: '👥' },
-    { id: 'newArrivals', label: 'New Arrivals', icon: '✨' },
-    { id: 'discovery', label: 'Repository Discovery', icon: '🔍' }
+    { id: 'discovery', label: 'Discover Ideas', icon: '🔍' }
   ];
 
   const handleCategoryToggle = (category: string) => {
@@ -58,7 +57,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
       isNew: false,
       isTrending: false,
       communityPick: false,
-      appliedSections: ['trending', 'community', 'newArrivals', 'discovery']
+      appliedSections: ['trending', 'community', 'discovery']
     });
   };
 
@@ -237,20 +236,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                   Special Filters
                 </h4>
                 <div className="space-y-3">
-                  <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.isNew}
-                      onChange={(e) => onFilterChange({ ...filters, isNew: e.target.checked })}
-                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                    />
-                    <span className="text-lg mr-2">✨</span>
-                    <div>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">New Repositories</span>
-                      <span className="text-xs text-gray-500">Recently created</span>
-                    </div>
-                  </label>
-                  
                   <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
                     <input
                       type="checkbox"
