@@ -52,6 +52,10 @@ const MainContent: React.FC<MainContentProps> = ({
 
   const lastIdeaElementRef = useRef<HTMLDivElement>(null);
 
+  // Track if this is the initial load to prevent flickering
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
     return (
@@ -74,10 +78,13 @@ const MainContent: React.FC<MainContentProps> = ({
     [hasActiveFilters, filters.appliedSections],
   );
 
-  // Check if initial data is loading (show full screen loader)
-  const isInitialLoading = useMemo(() => {
-    return loading && ideas.length === 0;
-  }, [loading, ideas.length]);
+  // Track loading states more precisely
+  useEffect(() => {
+    if (!loading && ideas.length > 0 && isInitialLoad) {
+      setIsInitialLoad(false);
+      setHasLoadedOnce(true);
+    }
+  }, [loading, ideas.length, isInitialLoad]);
 
   // Sync MainContent filters with useIdeas hook
   useEffect(() => {
@@ -95,7 +102,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Infinite scroll observer
   useEffect(() => {
-    if (loading) return;
+    if (loading || !hasLoadedOnce) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -115,7 +122,7 @@ const MainContent: React.FC<MainContentProps> = ({
         observer.unobserve(lastIdeaElementRef.current);
       }
     };
-  }, [loading, hasMore, loadMore]);
+  }, [loading, hasMore, loadMore, hasLoadedOnce]);
 
   // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
@@ -174,9 +181,31 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   };
 
-  // Show full screen loader during initial load
-  if (isInitialLoading) {
+  // Show full screen loader only during initial load
+  if (isInitialLoad && loading && ideas.length === 0) {
     return <FullScreenLoader message="Loading amazing ideas for you..." />;
+  }
+
+  // Show error state if there's an error and no data
+  if (error && ideas.length === 0 && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <Zap className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Unable to load ideas
+          </h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -255,143 +284,168 @@ const MainContent: React.FC<MainContentProps> = ({
           </section>
         )}
 
-        {/* Trending Ideas Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🔥 Trending Ideas
-              </h2>
-              <p className="text-gray-600">
-                {getSectionDescription('trending', trendingIdeas.length)}
-              </p>
-            </div>
-          </div>
+        {/* Content Sections - Only show if we have data or are not in initial loading */}
+        {(hasLoadedOnce || ideas.length > 0) && (
+          <>
+            {/* Trending Ideas Section */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    🔥 Trending Ideas
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('trending', trendingIdeas.length)}
+                  </p>
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {trendingIdeas.slice(0, 8).map((idea) => (
-              <IdeaCard
-                key={idea.id}
-                idea={idea}
-                onClick={() => handleIdeaSelect(idea)}
-                onRegisterClick={onRegisterClick}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Community Picks Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                👥 Community Picks
-              </h2>
-              <p className="text-gray-600">
-                {getSectionDescription('community', communityPicks.length)}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {communityPicks.slice(0, 8).map((idea) => (
-              <IdeaCard
-                key={idea.id}
-                idea={idea}
-                onClick={() => handleIdeaSelect(idea)}
-                onRegisterClick={onRegisterClick}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* New Arrivals Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                ✨ New Arrivals
-              </h2>
-              <p className="text-gray-600">
-                {getSectionDescription('newArrivals', newArrivals.length)}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {newArrivals.slice(0, 8).map((idea) => (
-              <IdeaCard
-                key={idea.id}
-                idea={idea}
-                onClick={() => handleIdeaSelect(idea)}
-                onRegisterClick={onRegisterClick}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Discovery Section with Infinite Scroll */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🔍 Discover Ideas
-              </h2>
-              <p className="text-gray-600">
-                {getSectionDescription('discovery', discoveryIdeas.length)}
-              </p>
-            </div>
-            {loading && ideas.length === 0 && (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {discoveryIdeas.map((idea, index) => {
-              if (discoveryIdeas.length === index + 1) {
-                return (
-                  <div key={idea.id} ref={lastIdeaElementRef}>
-                    <IdeaCard
-                      idea={idea}
-                      onClick={() => handleIdeaSelect(idea)}
-                      onRegisterClick={onRegisterClick}
-                    />
-                  </div>
-                );
-              } else {
-                return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {trendingIdeas.slice(0, 8).map((idea) => (
                   <IdeaCard
                     key={idea.id}
                     idea={idea}
                     onClick={() => handleIdeaSelect(idea)}
                     onRegisterClick={onRegisterClick}
                   />
-                );
-              }
-            })}
+                ))}
+              </div>
+            </section>
+
+            {/* Community Picks Section */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    👥 Community Picks
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('community', communityPicks.length)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {communityPicks.slice(0, 8).map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    onClick={() => handleIdeaSelect(idea)}
+                    onRegisterClick={onRegisterClick}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* New Arrivals Section */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    ✨ New Arrivals
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('newArrivals', newArrivals.length)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {newArrivals.slice(0, 8).map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    onClick={() => handleIdeaSelect(idea)}
+                    onRegisterClick={onRegisterClick}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* Discovery Section with Infinite Scroll */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    🔍 Discover Ideas
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('discovery', discoveryIdeas.length)}
+                  </p>
+                </div>
+                {loading && ideas.length > 0 && (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {discoveryIdeas.map((idea, index) => {
+                  if (discoveryIdeas.length === index + 1) {
+                    return (
+                      <div key={idea.id} ref={lastIdeaElementRef}>
+                        <IdeaCard
+                          idea={idea}
+                          onClick={() => handleIdeaSelect(idea)}
+                          onRegisterClick={onRegisterClick}
+                        />
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <IdeaCard
+                        key={idea.id}
+                        idea={idea}
+                        onClick={() => handleIdeaSelect(idea)}
+                        onRegisterClick={onRegisterClick}
+                      />
+                    );
+                  }
+                })}
+              </div>
+
+              {error && (
+                <div className="text-center mt-8">
+                  <p className="text-red-600">Error loading ideas: {error}</p>
+                </div>
+              )}
+
+              {/* Loading indicator for infinite scroll */}
+              {loading && ideas.length > 0 && (
+                <div className="text-center mt-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                  <p className="text-gray-600 mt-2">Loading more ideas...</p>
+                </div>
+              )}
+
+              {/* End of results indicator */}
+              {!loading && !hasMore && ideas.length > 0 && (
+                <div className="text-center mt-8">
+                  <p className="text-gray-600">You've reached the end! 🎉</p>
+                </div>
+              )}
+            </section>
+          </>
+        )}
+
+        {/* Empty state - only show if we've loaded and have no data */}
+        {hasLoadedOnce && ideas.length === 0 && !loading && !error && (
+          <div className="text-center py-12">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <Zap className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No ideas found
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Try adjusting your filters or check back later for new ideas.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+              Refresh
+            </button>
           </div>
-
-          {error && (
-            <div className="text-center mt-8">
-              <p className="text-red-600">Error loading ideas: {error}</p>
-            </div>
-          )}
-
-          {/* Loading indicator for infinite scroll */}
-          {loading && ideas.length > 0 && (
-            <div className="text-center mt-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading more ideas...</p>
-            </div>
-          )}
-
-          {/* End of results indicator */}
-          {!loading && !hasMore && ideas.length > 0 && (
-            <div className="text-center mt-8">
-              <p className="text-gray-600">You've reached the end! 🎉</p>
-            </div>
-          )}
-        </section>
+        )}
       </div>
     </div>
   );
