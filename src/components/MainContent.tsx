@@ -59,29 +59,6 @@ const MainContent: React.FC<MainContentProps> = ({
     return ideas.map(convertIdeaToIdeaData);
   }, [ideas]);
 
-  // Check if filters are active
-  const hasActiveFilters = useMemo(() => {
-    return (
-      searchQuery.trim() !== '' ||
-      filters.categories.length > 0 ||
-      filters.industries.length > 0 ||
-      filters.license.length > 0 ||
-      filters.opportunityScore[0] > 0 ||
-      filters.opportunityScore[1] < 100 ||
-      filters.isNew ||
-      filters.isTrending ||
-      filters.communityPick
-    );
-  }, [searchQuery, filters]);
-
-  // Helper function to check if a section should be filtered
-  const shouldFilterSection = useCallback(
-    (sectionId: string) => {
-      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
-    },
-    [hasActiveFilters, filters.appliedSections],
-  );
-
   // Convert FilterOptions to IdeaFilters format
   const convertToIdeaFilters = useCallback((filterOptions: FilterOptions, searchTerm: string): IdeaFilters => {
     return {
@@ -134,16 +111,115 @@ const MainContent: React.FC<MainContentProps> = ({
     };
   }, [loading, hasMore, loadMore, initialized]);
 
+  // Check if filters are active (excluding appliedSections)
+  const hasActiveFilters = useMemo(() => {
+    return (
+      searchQuery.trim() !== '' ||
+      filters.categories.length > 0 ||
+      filters.industries.length > 0 ||
+      filters.license.length > 0 ||
+      filters.opportunityScore[0] > 0 ||
+      filters.opportunityScore[1] < 100 ||
+      filters.isNew ||
+      filters.isTrending ||
+      filters.communityPick
+    );
+  }, [searchQuery, filters]);
+
+  // Helper function to check if a section should have filters applied
+  const shouldApplyFiltersToSection = useCallback(
+    (sectionId: string) => {
+      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
+    },
+    [hasActiveFilters, filters.appliedSections],
+  );
+
+  // Helper function to filter ideas for a specific section
+  const filterIdeasForSection = useCallback(
+    (ideas: IdeaData[], sectionId: string) => {
+      if (!shouldApplyFiltersToSection(sectionId)) {
+        return ideas; // Return all ideas if no filters should be applied to this section
+      }
+
+      let filteredIdeas = ideas;
+
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filteredIdeas = filteredIdeas.filter(
+          (idea) =>
+            idea.title.toLowerCase().includes(query) ||
+            idea.tagline.toLowerCase().includes(query) ||
+            idea.description.toLowerCase().includes(query) ||
+            idea.ossProject.toLowerCase().includes(query) ||
+            idea.categories.some((category) =>
+              category.toLowerCase().includes(query),
+            ),
+        );
+      }
+
+      // Apply category filter
+      if (filters.categories.length > 0) {
+        filteredIdeas = filteredIdeas.filter((idea) =>
+          idea.categories.some((category) =>
+            filters.categories.includes(category),
+          ),
+        );
+      }
+
+      // Apply industry filter
+      if (filters.industries.length > 0) {
+        filteredIdeas = filteredIdeas.filter((idea) =>
+          idea.industries?.some((industry) =>
+            filters.industries.includes(industry),
+          ),
+        );
+      }
+
+      // Apply license filter
+      if (filters.license.length > 0) {
+        filteredIdeas = filteredIdeas.filter((idea) =>
+          filters.license.includes(idea.license),
+        );
+      }
+
+      // Apply opportunity score filter
+      if (filters.opportunityScore[0] > 0 || filters.opportunityScore[1] < 100) {
+        filteredIdeas = filteredIdeas.filter(
+          (idea) =>
+            idea.opportunityScore >= filters.opportunityScore[0] &&
+            idea.opportunityScore <= filters.opportunityScore[1],
+        );
+      }
+
+      // Apply special filters
+      if (filters.isNew) {
+        filteredIdeas = filteredIdeas.filter((idea) => idea.isNew);
+      }
+
+      if (filters.isTrending) {
+        filteredIdeas = filteredIdeas.filter((idea) => idea.isTrending);
+      }
+
+      if (filters.communityPick) {
+        filteredIdeas = filteredIdeas.filter((idea) => idea.communityPick);
+      }
+
+      return filteredIdeas;
+    },
+    [shouldApplyFiltersToSection, searchQuery, filters],
+  );
+
   // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
-    let filtered = convertedIdeas.filter((idea) => idea.isTrending);
-    if (shouldFilterSection('trending')) {
-      // Apply additional filters if needed
-    }
+    let baseIdeas = convertedIdeas.filter((idea) => idea.isTrending);
+    
+    // Apply filters if this section is selected for filtering
+    const filtered = filterIdeasForSection(baseIdeas, 'trending');
+    
     // Sort by teardown score from the original ideas data (highest first) and take top 4
     return filtered
       .sort((a, b) => {
-        // Get the original idea data to access overall_teardown_score
         const ideaA = ideas.find(idea => idea.id === a.id);
         const ideaB = ideas.find(idea => idea.id === b.id);
         const scoreA = ideaA?.overall_teardown_score || 0;
@@ -151,26 +227,30 @@ const MainContent: React.FC<MainContentProps> = ({
         return scoreB - scoreA;
       })
       .slice(0, 4);
-  }, [convertedIdeas, ideas, shouldFilterSection]);
+  }, [convertedIdeas, ideas, filterIdeasForSection]);
 
   const communityPicks = useMemo(() => {
-    let filtered = convertedIdeas.filter((idea) => idea.communityPick);
-    if (shouldFilterSection('community')) {
-      // Apply additional filters if needed
-    }
+    let baseIdeas = convertedIdeas.filter((idea) => idea.communityPick);
+    
+    // Apply filters if this section is selected for filtering
+    const filtered = filterIdeasForSection(baseIdeas, 'community');
+    
     // Sort by repository stars (highest first) and take top 4
     return filtered
       .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
       .slice(0, 4);
-  }, [convertedIdeas, shouldFilterSection]);
+  }, [convertedIdeas, filterIdeasForSection]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
   const discoveryIdeas = useMemo(() => {
-    return convertedIdeas.sort((a, b) => {
+    let baseIdeas = convertedIdeas.sort((a, b) => {
       if (!a.generatedAt || !b.generatedAt) return 0;
       return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
     });
-  }, [convertedIdeas]);
+
+    // Apply filters if this section is selected for filtering
+    return filterIdeasForSection(baseIdeas, 'discovery');
+  }, [convertedIdeas, filterIdeasForSection]);
 
   // Handle idea selection - navigate to idea detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -178,13 +258,11 @@ const MainContent: React.FC<MainContentProps> = ({
   };
 
   // Helper function to get section description
-  const getSectionDescription = (sectionId: string, currentCount: number) => {
-    const isFiltered = shouldFilterSection(sectionId);
+  const getSectionDescription = (sectionId: string, currentCount: number, originalCount: number) => {
+    const isFiltered = shouldApplyFiltersToSection(sectionId);
 
-    if (hasActiveFilters && isFiltered) {
-      return `${currentCount} ${
-        currentCount === 1 ? 'result' : 'results'
-      } match your filters`;
+    if (isFiltered && currentCount !== originalCount) {
+      return `${currentCount} of ${originalCount} ideas match your filters`;
     }
 
     // Descriptive counts for sections
@@ -314,7 +392,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     🔥 Trending Ideas
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('trending', trendingIdeas.length)}
+                    {getSectionDescription('trending', trendingIdeas.length, convertedIdeas.filter(idea => idea.isTrending).length)}
                   </p>
                 </div>
               </div>
@@ -339,7 +417,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     👥 Community Picks
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('community', communityPicks.length)}
+                    {getSectionDescription('community', communityPicks.length, convertedIdeas.filter(idea => idea.communityPick).length)}
                   </p>
                 </div>
               </div>
@@ -364,7 +442,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     🔍 Discover Ideas
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('discovery', discoveryIdeas.length)}
+                    {getSectionDescription('discovery', discoveryIdeas.length, convertedIdeas.length)}
                   </p>
                 </div>
                 {loading && convertedIdeas.length > 0 && (
