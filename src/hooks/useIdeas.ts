@@ -283,6 +283,7 @@ export const useIdeas = () => {
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
+    setInitialized(false); // Reset initialization for new filter
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -302,13 +303,6 @@ export const useIdeas = () => {
   // Initial fetch - only run once on mount
   useEffect(() => {
     if (!initialized) {
-      fetchIdeas(0, true);
-    }
-  }, []); // Empty dependency array - only run once on mount
-
-  // Fetch when filters change (but not on initial mount)
-  useEffect(() => {
-    if (initialized) {
       fetchIdeas(0, true);
     }
   }, [filters, initialized, fetchIdeas]);
