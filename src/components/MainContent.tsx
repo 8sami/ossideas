@@ -82,21 +82,33 @@ const MainContent: React.FC<MainContentProps> = ({
     [hasActiveFilters, filters.appliedSections],
   );
 
-  // Sync MainContent filters with useIdeas hook
-  useEffect(() => {
-    const ideaFilters: IdeaFilters = {
-      min_score: filters.opportunityScore[0],
-      max_score: filters.opportunityScore[1],
-      is_premium: null,
-      status: [],
-      search_query: searchQuery,
-      idea_categories: filters.categories,
-      idea_industries: filters.industries,
-      license_names: filters.license,
+  // Convert FilterOptions to IdeaFilters format
+  const convertToIdeaFilters = useCallback((filterOptions: FilterOptions, searchTerm: string): IdeaFilters => {
+    return {
+      min_score: filterOptions.opportunityScore[0],
+      max_score: filterOptions.opportunityScore[1],
+      is_premium: null, // We don't filter by premium status in the UI currently
+      status: [], // We don't filter by status in the UI currently
+      search_query: searchTerm,
+      idea_categories: filterOptions.categories,
+      idea_industries: filterOptions.industries,
+      license_names: filterOptions.license,
     };
+  }, []);
 
-    applyIdeaFiltersFromHook(ideaFilters);
-  }, [searchQuery, filters, applyIdeaFiltersFromHook]);
+  // Apply filters when they change - use a ref to prevent infinite loops
+  const lastAppliedFiltersRef = useRef<string>('');
+  
+  useEffect(() => {
+    const ideaFilters = convertToIdeaFilters(filters, searchQuery);
+    const filtersString = JSON.stringify(ideaFilters);
+    
+    // Only apply if filters actually changed
+    if (filtersString !== lastAppliedFiltersRef.current) {
+      lastAppliedFiltersRef.current = filtersString;
+      applyIdeaFiltersFromHook(ideaFilters);
+    }
+  }, [filters, searchQuery, convertToIdeaFilters, applyIdeaFiltersFromHook]);
 
   // Infinite scroll observer
   useEffect(() => {
