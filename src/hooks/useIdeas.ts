@@ -155,29 +155,26 @@ export const useIdeas = () => {
   );
 
   const fetchIdeas = useCallback(
-    async (page: number = 0, reset: boolean = false, filtersToUse: IdeaFilters | null = null) => {
+    async (page: number = 0, reset: boolean = false) => {
       // Prevent multiple simultaneous requests
       if (loading && initialized) return;
 
       setLoading(true);
       setError(null);
 
-      // Use provided filters or current filters
-      const currentFilters = filtersToUse || filters;
-
       try {
         // Pre-filter by categories and industries if needed
         let filteredIdeaIds: string[] | null = null;
 
         // If we have category or industry filters, we need to pre-fetch the idea IDs
-        if (currentFilters.idea_categories.length > 0 || currentFilters.idea_industries.length > 0) {
+        if (filters.idea_categories.length > 0 || filters.idea_industries.length > 0) {
           // Get idea IDs that match category filters
           let categoryIdeaIds: string[] | null = null;
-          if (currentFilters.idea_categories.length > 0) {
+          if (filters.idea_categories.length > 0) {
             const { data: categoryData, error: categoryError } = await supabase
               .from('auto_idea_category')
               .select('idea_id')
-              .in('category_name', currentFilters.idea_categories);
+              .in('category_name', filters.idea_categories);
 
             if (categoryError) {
               console.error('Error fetching category idea IDs:', categoryError);
@@ -200,11 +197,11 @@ export const useIdeas = () => {
 
           // Get idea IDs that match industry filters
           let industryIdeaIds: string[] | null = null;
-          if (currentFilters.idea_industries.length > 0) {
+          if (filters.idea_industries.length > 0) {
             const { data: industryData, error: industryError } = await supabase
               .from('auto_idea_industry')
               .select('idea_id')
-              .in('industry_name', currentFilters.idea_industries);
+              .in('industry_name', filters.idea_industries);
 
             if (industryError) {
               console.error('Error fetching industry idea IDs:', industryError);
@@ -246,7 +243,7 @@ export const useIdeas = () => {
         }
 
         // Now fetch the ideas with all filters applied
-        const { data, error: fetchError } = await buildQuery(page, currentFilters, filteredIdeaIds);
+        const { data, error: fetchError } = await buildQuery(page, filters, filteredIdeaIds);
 
         if (fetchError) {
           throw fetchError;
@@ -286,9 +283,8 @@ export const useIdeas = () => {
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
-    // Instead of setting initialized to false, directly fetch with new filters
-    fetchIdeas(0, true, newFilters);
-  }, [fetchIdeas]);
+    setInitialized(false); // Reset initialization for new filter
+  }, []);
 
   const resetFilters = useCallback(() => {
     const defaultFilters: IdeaFilters = {
@@ -309,7 +305,7 @@ export const useIdeas = () => {
     if (!initialized) {
       fetchIdeas(0, true);
     }
-  }, [initialized, fetchIdeas]);
+  }, [filters, initialized, fetchIdeas]);
 
   return {
     ideas,
