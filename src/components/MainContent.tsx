@@ -77,7 +77,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // Helper function to check if a section should be filtered
   const shouldFilterSection = useCallback(
     (sectionId: string) => {
-      return hasActiveFilters && filters.appliedSections.includes(sectionId);
+      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
     },
     [hasActiveFilters, filters.appliedSections],
   );

@@ -76,7 +76,7 @@ export const useIdeas = () => {
   });
 
   const buildQuery = useCallback(
-    (page: number, currentFilters: IdeaFilters) => {
+    (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
       let query = supabase
         .from('ideas')
         .select(
@@ -110,10 +110,14 @@ export const useIdeas = () => {
         )
       `,
         )
-        .order('generated_at', { ascending: false })
-        .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
+        .order('generated_at', { ascending: false });
 
-      // Apply filters
+      // Apply idea ID filter if provided (from category/industry filtering)
+      if (filteredIdeaIds && filteredIdeaIds.length > 0) {
+        query = query.in('id', filteredIdeaIds);
+      }
+
+      // Apply score filters
       if (currentFilters.min_score > 0) {
         query = query.gte('overall_teardown_score', currentFilters.min_score);
       }
@@ -122,46 +126,30 @@ export const useIdeas = () => {
         query = query.lte('overall_teardown_score', currentFilters.max_score);
       }
 
+      // Apply premium filter
       if (currentFilters.is_premium !== null) {
         query = query.eq('is_premium', currentFilters.is_premium);
       }
 
+      // Apply status filter
       if (currentFilters.status.length > 0) {
         query = query.in('status', currentFilters.status);
       }
 
+      // Apply search query
       if (currentFilters.search_query) {
         query = query.or(
-          `title.ilike.%${currentFilters.search_query}%,summary.ilike.%${currentFilters.search_query}%`,
+          `title.ilike.%${currentFilters.search_query}%,repository.description.ilike.%${currentFilters.search_query}%`,
         );
       }
 
-      // Filter by idea categories using the auto_idea_category view
-      if (currentFilters.idea_categories.length > 0) {
-        query = query.in('id', 
-          supabase
-            .from('auto_idea_category')
-            .select('idea_id')
-            .in('category_name', currentFilters.idea_categories)
-        );
-      }
-
-      // Filter by idea industries using the auto_idea_industry view
-      if (currentFilters.idea_industries.length > 0) {
-        query = query.in('id', 
-          supabase
-            .from('auto_idea_industry')
-            .select('idea_id')
-            .in('industry_name', currentFilters.idea_industries)
-        );
-      }
-
-      // Filter by repository license
+      // Apply license filter directly (no need for subquery)
       if (currentFilters.license_names.length > 0) {
         query = query.in('repository.license_name', currentFilters.license_names);
       }
 
-      return query;
+      // Apply pagination
+      return query.range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
     },
     [],
   );
@@ -175,7 +163,87 @@ export const useIdeas = () => {
       setError(null);
 
       try {
-        const { data, error: fetchError } = await buildQuery(page, filters);
+        // Pre-filter by categories and industries if needed
+        let filteredIdeaIds: string[] | null = null;
+
+        // If we have category or industry filters, we need to pre-fetch the idea IDs
+        if (filters.idea_categories.length > 0 || filters.idea_industries.length > 0) {
+          // Get idea IDs that match category filters
+          let categoryIdeaIds: string[] | null = null;
+          if (filters.idea_categories.length > 0) {
+            const { data: categoryData, error: categoryError } = await supabase
+              .from('auto_idea_category')
+              .select('idea_id')
+              .in('category_name', filters.idea_categories);
+
+            if (categoryError) {
+              console.error('Error fetching category idea IDs:', categoryError);
+              throw new Error('Failed to filter by categories');
+            }
+
+            if (categoryData && categoryData.length > 0) {
+              categoryIdeaIds = [...new Set(categoryData.map(item => item.idea_id))];
+            } else {
+              // No ideas match the category filter, return empty result
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
+              }
+              return;
+            }
+          }
+
+          // Get idea IDs that match industry filters
+          let industryIdeaIds: string[] | null = null;
+          if (filters.idea_industries.length > 0) {
+            const { data: industryData, error: industryError } = await supabase
+              .from('auto_idea_industry')
+              .select('idea_id')
+              .in('industry_name', filters.idea_industries);
+
+            if (industryError) {
+              console.error('Error fetching industry idea IDs:', industryError);
+              throw new Error('Failed to filter by industries');
+            }
+
+            if (industryData && industryData.length > 0) {
+              industryIdeaIds = [...new Set(industryData.map(item => item.idea_id))];
+            } else {
+              // No ideas match the industry filter, return empty result
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
+              }
+              return;
+            }
+          }
+
+          // If both category and industry filters are active, find the intersection
+          if (categoryIdeaIds && industryIdeaIds) {
+            filteredIdeaIds = categoryIdeaIds.filter(id => industryIdeaIds!.includes(id));
+            
+            // If intersection is empty, return empty result
+            if (filteredIdeaIds.length === 0) {
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
+              }
+              return;
+            }
+          } else {
+            // Use whichever filter is active
+            filteredIdeaIds = categoryIdeaIds || industryIdeaIds;
+          }
+        }
+
+        // Now fetch the ideas with all filters applied
+        const { data, error: fetchError } = await buildQuery(page, filters, filteredIdeaIds);
 
         if (fetchError) {
           throw fetchError;
