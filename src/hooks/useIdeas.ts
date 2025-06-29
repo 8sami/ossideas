@@ -14,6 +14,7 @@ export interface Idea {
   generated_at: string;
   last_updated_at: string;
   generated_by_ai_model: string | null;
+  categories: any; // JSON field containing categories array
   repository?: {
     id: string;
     full_name: string;
@@ -48,7 +49,8 @@ export interface IdeaFilters {
   is_premium: boolean | null;
   status: string[];
   search_query: string;
-  repository_topics: string[];
+  idea_categories: string[]; // Changed from repository_topics to idea_categories
+  license_names: string[]; // Added for license filtering
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -66,7 +68,8 @@ export const useIdeas = () => {
     is_premium: null,
     status: [],
     search_query: '',
-    repository_topics: [],
+    idea_categories: [],
+    license_names: [],
   });
 
   const buildQuery = useCallback(
@@ -128,6 +131,21 @@ export const useIdeas = () => {
         query = query.or(
           `title.ilike.%${currentFilters.search_query}%,summary.ilike.%${currentFilters.search_query}%`,
         );
+      }
+
+      // Filter by idea categories using the auto_idea_category view
+      if (currentFilters.idea_categories.length > 0) {
+        query = query.in('id', 
+          supabase
+            .from('auto_idea_category')
+            .select('idea_id')
+            .in('category_name', currentFilters.idea_categories)
+        );
+      }
+
+      // Filter by repository license
+      if (currentFilters.license_names.length > 0) {
+        query = query.in('repository.license_name', currentFilters.license_names);
       }
 
       return query;
@@ -194,7 +212,8 @@ export const useIdeas = () => {
       is_premium: null,
       status: [],
       search_query: '',
-      repository_topics: [],
+      idea_categories: [],
+      license_names: [],
     };
     applyFilters(defaultFilters);
   }, [applyFilters]);
@@ -285,6 +304,23 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
         'Market saturation',
       ];
 
+  // Extract categories from the idea's categories JSON field
+  let categories: string[] = [];
+  if (idea.categories) {
+    try {
+      if (Array.isArray(idea.categories)) {
+        categories = idea.categories;
+      } else if (typeof idea.categories === 'string') {
+        categories = JSON.parse(idea.categories);
+      }
+    } catch (e) {
+      console.warn('Failed to parse idea categories:', e);
+      categories = idea.repository?.topics || ['Open Source'];
+    }
+  } else {
+    categories = idea.repository?.topics || ['Open Source'];
+  }
+
   // Determine if repository is new (created within last 30 days)
   const isNew = idea.repository?.created_at_github
     ? new Date(idea.repository.created_at_github) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -311,7 +347,7 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
     description:
       idea.summary || 'No detailed description available for this idea.',
     ossProject: idea.repository?.full_name || 'Unknown Repository',
-    categories: idea.repository?.topics || ['Open Source'],
+    categories,
     opportunityScore: idea.overall_teardown_score || 0,
     license: idea.repository?.license_name || 'Unknown',
     marketSize,

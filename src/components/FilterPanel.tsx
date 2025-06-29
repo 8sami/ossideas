@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Sliders, Check } from 'lucide-react';
 import { FilterOptions } from '../types';
+import { useCategories } from '../hooks/useCategories';
+import { useLicenses } from '../hooks/useLicenses';
 
 interface FilterPanelProps {
   filters: FilterOptions;
@@ -10,13 +12,8 @@ interface FilterPanelProps {
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOpen, onClose }) => {
-  const categories = [
-    'AI/ML', 'DevTools', 'SaaS', 'E-commerce', 'Data Analytics', 
-    'Security', 'Mobile', 'Web Dev', 'IoT', 'Blockchain', 'Database',
-    'Frontend', 'Backend', 'Machine Learning', 'Cloud', 'API'
-  ];
-
-  const licenses = ['MIT', 'Apache', 'GPL', 'BSD', 'ISC', 'Other'];
+  const { categories, loading: categoriesLoading } = useCategories();
+  const { licenses, loading: licensesLoading } = useLicenses();
 
   const sections = [
     { id: 'trending', label: 'Trending Ideas', icon: '🔥' },
@@ -149,19 +146,30 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                   <span className="text-lg mr-2">📂</span>
                   Categories & Topics
                 </h4>
-                <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto custom-scrollbar">
-                  {categories.map((category) => (
-                    <label key={category} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
-                      <input
-                        type="checkbox"
-                        checked={filters.categories.includes(category)}
-                        onChange={() => handleCategoryToggle(category)}
-                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                      />
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{category}</span>
-                    </label>
-                  ))}
-                </div>
+                {categoriesLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto custom-scrollbar">
+                    {categories.map((category) => (
+                      <label key={category.category_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={filters.categories.includes(category.category_name)}
+                            onChange={() => handleCategoryToggle(category.category_name)}
+                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
+                          />
+                          <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{category.category_name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          {category.idea_count}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -212,19 +220,30 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                   <span className="text-lg mr-2">📄</span>
                   License Type
                 </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2">
-                  {licenses.map((license) => (
-                    <label key={license} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
-                      <input
-                        type="checkbox"
-                        checked={filters.license.includes(license)}
-                        onChange={() => handleLicenseToggle(license)}
-                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-2 flex-shrink-0"
-                      />
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{license}</span>
-                    </label>
-                  ))}
-                </div>
+                {licensesLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                    {licenses.slice(0, 10).map((license) => (
+                      <label key={license.license_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={filters.license.includes(license.license_name)}
+                            onChange={() => handleLicenseToggle(license.license_name)}
+                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-2 flex-shrink-0"
+                          />
+                          <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{license.license_name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          {license.idea_count}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -261,6 +280,20 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                     <div>
                       <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">Community Choice</span>
                       <span className="text-xs text-gray-500">Highly rated</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
+                    <input
+                      type="checkbox"
+                      checked={filters.isNew}
+                      onChange={(e) => onFilterChange({ ...filters, isNew: e.target.checked })}
+                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
+                    />
+                    <span className="text-lg mr-2">✨</span>
+                    <div>
+                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">New Ideas</span>
+                      <span className="text-xs text-gray-500">Recently generated</span>
                     </div>
                   </label>
                 </div>

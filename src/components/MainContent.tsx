@@ -88,7 +88,8 @@ const MainContent: React.FC<MainContentProps> = ({
       is_premium: null,
       status: [],
       search_query: searchQuery,
-      repository_topics: filters.categories,
+      idea_categories: filters.categories, // Use idea categories instead of repository topics
+      license_names: filters.license, // Add license filtering
     };
 
     applyIdeaFiltersFromHook(ideaFilters);
