@@ -16,6 +16,7 @@ export interface Idea {
   generated_by_ai_model: string | null;
   categories: any; // JSON field containing categories array
   industries: any; // JSON field containing industries array
+  overview: any; // JSON field containing overview data
   repository?: {
     id: string;
     full_name: string;
@@ -489,6 +490,34 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
     }
   }
 
+  // Extract tagline from the idea's overview JSON field
+  let tagline = '';
+  if (idea.overview) {
+    try {
+      let overviewData;
+      if (typeof idea.overview === 'string') {
+        overviewData = JSON.parse(idea.overview);
+      } else {
+        overviewData = idea.overview;
+      }
+      
+      // Try different possible field names for tagline
+      tagline = overviewData?.tagline || 
+                overviewData?.description || 
+                overviewData?.summary || 
+                overviewData?.brief || 
+                '';
+    } catch (e) {
+      console.warn('Failed to parse idea overview:', e);
+      tagline = '';
+    }
+  }
+
+  // Fallback to repository description if no tagline found
+  if (!tagline) {
+    tagline = idea.repository?.description || idea.title;
+  }
+
   // Determine if repository is new (created within last 30 days)
   const isNew = idea.repository?.created_at_github
     ? new Date(idea.repository.created_at_github) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -511,7 +540,7 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
   return {
     id: idea.id,
     title: idea.title,
-    tagline: idea.summary || idea.title,
+    tagline: tagline, // Now using the extracted tagline from overview
     description:
       idea.summary || 'No detailed description available for this idea.',
     ossProject: idea.repository?.full_name || 'Unknown Repository',
