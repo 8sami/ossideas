@@ -77,6 +77,7 @@ export const useIdeas = () => {
 
   // AbortController ref to manage request cancellation
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isInitialLoadRef = useRef(true);
 
   const buildQuery = useCallback(
     (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
@@ -159,8 +160,8 @@ export const useIdeas = () => {
 
   const fetchIdeas = useCallback(
     async (page: number = 0, reset: boolean = false) => {
-      // Only abort if we have an existing controller and we're not on initial load
-      if (abortControllerRef.current && initialized) {
+      // Only abort previous requests if this is not the initial load and we have an existing controller
+      if (abortControllerRef.current && !isInitialLoadRef.current) {
         abortControllerRef.current.abort();
       }
 
@@ -192,8 +193,7 @@ export const useIdeas = () => {
             const { data: categoryData, error: categoryError } = await supabase
               .from('auto_idea_category')
               .select('idea_id')
-              .in('category_name', filters.idea_categories)
-              .abortSignal(signal);
+              .in('category_name', filters.idea_categories);
 
             if (categoryError) {
               // Check if error is due to abort
@@ -226,8 +226,7 @@ export const useIdeas = () => {
             const { data: industryData, error: industryError } = await supabase
               .from('auto_idea_industry')
               .select('idea_id')
-              .in('industry_name', filters.idea_industries)
-              .abortSignal(signal);
+              .in('industry_name', filters.idea_industries);
 
             if (industryError) {
               // Check if error is due to abort
@@ -281,14 +280,16 @@ export const useIdeas = () => {
           return;
         }
 
-        // Build the query without abort signal first
-        const query = buildQuery(page, filters, filteredIdeaIds);
+        // Build the query
+        let query = buildQuery(page, filters, filteredIdeaIds);
         
-        // Add abort signal only if we're not on initial load or if initialized
-        const finalQuery = initialized ? query.abortSignal(signal) : query;
+        // Only add abort signal for non-initial loads
+        if (!isInitialLoadRef.current) {
+          query = query.abortSignal(signal);
+        }
         
         // Now fetch the ideas with all filters applied
-        const { data, error: fetchError } = await finalQuery;
+        const { data, error: fetchError } = await query;
 
         if (fetchError) {
           // Check if error is due to abort
@@ -327,6 +328,7 @@ export const useIdeas = () => {
           setLoading(false);
           if (!initialized) {
             setInitialized(true);
+            isInitialLoadRef.current = false;
           }
         }
       }
