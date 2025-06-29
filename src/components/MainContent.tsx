@@ -29,6 +29,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
+    industries: [],
     opportunityScore: [0, 100],
     license: [],
     isNew: false,
@@ -63,6 +64,7 @@ const MainContent: React.FC<MainContentProps> = ({
     return (
       searchQuery.trim() !== '' ||
       filters.categories.length > 0 ||
+      filters.industries.length > 0 ||
       filters.license.length > 0 ||
       filters.opportunityScore[0] > 0 ||
       filters.opportunityScore[1] < 100 ||
@@ -88,8 +90,9 @@ const MainContent: React.FC<MainContentProps> = ({
       is_premium: null,
       status: [],
       search_query: searchQuery,
-      idea_categories: filters.categories, // Use idea categories instead of repository topics
-      license_names: filters.license, // Add license filtering
+      idea_categories: filters.categories,
+      idea_industries: filters.industries,
+      license_names: filters.license,
     };
 
     applyIdeaFiltersFromHook(ideaFilters);

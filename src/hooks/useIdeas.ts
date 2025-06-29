@@ -15,6 +15,7 @@ export interface Idea {
   last_updated_at: string;
   generated_by_ai_model: string | null;
   categories: any; // JSON field containing categories array
+  industries: any; // JSON field containing industries array
   repository?: {
     id: string;
     full_name: string;
@@ -49,8 +50,9 @@ export interface IdeaFilters {
   is_premium: boolean | null;
   status: string[];
   search_query: string;
-  idea_categories: string[]; // Changed from repository_topics to idea_categories
-  license_names: string[]; // Added for license filtering
+  idea_categories: string[]; // Categories filter
+  idea_industries: string[]; // Industries filter
+  license_names: string[]; // License filter
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -69,6 +71,7 @@ export const useIdeas = () => {
     status: [],
     search_query: '',
     idea_categories: [],
+    idea_industries: [],
     license_names: [],
   });
 
@@ -143,6 +146,16 @@ export const useIdeas = () => {
         );
       }
 
+      // Filter by idea industries using the auto_idea_industry view
+      if (currentFilters.idea_industries.length > 0) {
+        query = query.in('id', 
+          supabase
+            .from('auto_idea_industry')
+            .select('idea_id')
+            .in('industry_name', currentFilters.idea_industries)
+        );
+      }
+
       // Filter by repository license
       if (currentFilters.license_names.length > 0) {
         query = query.in('repository.license_name', currentFilters.license_names);
@@ -213,6 +226,7 @@ export const useIdeas = () => {
       status: [],
       search_query: '',
       idea_categories: [],
+      idea_industries: [],
       license_names: [],
     };
     applyFilters(defaultFilters);
@@ -321,6 +335,21 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
     categories = idea.repository?.topics || ['Open Source'];
   }
 
+  // Extract industries from the idea's industries JSON field
+  let industries: string[] = [];
+  if (idea.industries) {
+    try {
+      if (Array.isArray(idea.industries)) {
+        industries = idea.industries;
+      } else if (typeof idea.industries === 'string') {
+        industries = JSON.parse(idea.industries);
+      }
+    } catch (e) {
+      console.warn('Failed to parse idea industries:', e);
+      industries = [];
+    }
+  }
+
   // Determine if repository is new (created within last 30 days)
   const isNew = idea.repository?.created_at_github
     ? new Date(idea.repository.created_at_github) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -348,6 +377,7 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
       idea.summary || 'No detailed description available for this idea.',
     ossProject: idea.repository?.full_name || 'Unknown Repository',
     categories,
+    industries,
     opportunityScore: idea.overall_teardown_score || 0,
     license: idea.repository?.license_name || 'Unknown',
     marketSize,

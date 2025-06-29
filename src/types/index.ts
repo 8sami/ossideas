@@ -20,10 +20,12 @@ export interface IdeaData {
   isFromDatabase?: boolean;
   generatedAt?: string;
   repositoryStargazersCount?: number;
+  industries?: string[];
 }
 
 export interface FilterOptions {
   categories: string[];
+  industries: string[];
   opportunityScore: [number, number];
   license: string[];
   isNew: boolean;

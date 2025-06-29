@@ -3,6 +3,7 @@ import { X, Sliders, Check } from 'lucide-react';
 import { FilterOptions } from '../types';
 import { useCategories } from '../hooks/useCategories';
 import { useLicenses } from '../hooks/useLicenses';
+import { useIndustries } from '../hooks/useIndustries';
 
 interface FilterPanelProps {
   filters: FilterOptions;
@@ -14,6 +15,7 @@ interface FilterPanelProps {
 const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOpen, onClose }) => {
   const { categories, loading: categoriesLoading } = useCategories();
   const { licenses, loading: licensesLoading } = useLicenses();
+  const { industries, loading: industriesLoading } = useIndustries();
 
   const sections = [
     { id: 'trending', label: 'Trending Ideas', icon: '🔥' },
@@ -27,6 +29,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
       : [...filters.categories, category];
     
     onFilterChange({ ...filters, categories: newCategories });
+  };
+
+  const handleIndustryToggle = (industry: string) => {
+    const newIndustries = filters.industries.includes(industry)
+      ? filters.industries.filter(i => i !== industry)
+      : [...filters.industries, industry];
+    
+    onFilterChange({ ...filters, industries: newIndustries });
   };
 
   const handleLicenseToggle = (license: string) => {
@@ -49,6 +59,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   const clearAllFilters = () => {
     onFilterChange({
       categories: [],
+      industries: [],
       opportunityScore: [0, 100],
       license: [],
       isNew: false,
@@ -60,6 +71,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
 
   const hasActiveFilters = 
     filters.categories.length > 0 ||
+    filters.industries.length > 0 ||
     filters.license.length > 0 ||
     filters.isNew ||
     filters.isTrending ||
@@ -87,7 +99,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                 </div>
                 <span className="text-xs text-gray-400">•</span>
                 <span className="text-xs text-gray-500 truncate">
-                  {hasActiveFilters ? `${filters.categories.length + filters.license.length + (filters.isNew ? 1 : 0) + (filters.isTrending ? 1 : 0) + (filters.communityPick ? 1 : 0)} filters active` : 'No filters applied'}
+                  {hasActiveFilters ? `${filters.categories.length + filters.industries.length + filters.license.length + (filters.isNew ? 1 : 0) + (filters.isTrending ? 1 : 0) + (filters.communityPick ? 1 : 0)} filters active` : 'No filters applied'}
                 </span>
               </div>
             </div>
@@ -141,7 +153,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
 
             {/* Categories */}
             <div className="md:col-span-1 lg:col-span-3">
-              <div className="border border-orange-200 pb-8 rounded-xl p-4 bg-white">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <span className="text-lg mr-2">📂</span>
                   Categories & Topics
@@ -151,7 +163,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
                     {categories.map((category) => (
                       <label key={category.category_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
                         <div className="flex items-center">
@@ -165,6 +177,40 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                         </div>
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                           {category.idea_count}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Industries */}
+            <div className="md:col-span-1 lg:col-span-3">
+              <div className="border border-orange-200 rounded-xl p-4 bg-white">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <span className="text-lg mr-2">🏭</span>
+                  Industries
+                </h4>
+                {industriesLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                    {industries.map((industry) => (
+                      <label key={industry.industry_name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={filters.industries.includes(industry.industry_name)}
+                            onChange={() => handleIndustryToggle(industry.industry_name)}
+                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
+                          />
+                          <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{industry.industry_name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          {industry.idea_count}
                         </span>
                       </label>
                     ))}
@@ -244,59 +290,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Special Filters */}
-            <div className="md:col-span-2 lg:col-span-3">
-              <div className="border border-orange-200 rounded-xl p-4 h-full bg-white">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                  <span className="text-lg mr-2">⭐</span>
-                  Special Filters
-                </h4>
-                <div className="space-y-3">
-                  <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.isTrending}
-                      onChange={(e) => onFilterChange({ ...filters, isTrending: e.target.checked })}
-                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                    />
-                    <span className="text-lg mr-2">🔥</span>
-                    <div>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">Trending Now</span>
-                      <span className="text-xs text-gray-500">Popular this week</span>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.communityPick}
-                      onChange={(e) => onFilterChange({ ...filters, communityPick: e.target.checked })}
-                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                    />
-                    <span className="text-lg mr-2">👥</span>
-                    <div>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">Community Choice</span>
-                      <span className="text-xs text-gray-500">Highly rated</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150 border-2 border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.isNew}
-                      onChange={(e) => onFilterChange({ ...filters, isNew: e.target.checked })}
-                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                    />
-                    <span className="text-lg mr-2">✨</span>
-                    <div>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium block">New Ideas</span>
-                      <span className="text-xs text-gray-500">Recently generated</span>
-                    </div>
-                  </label>
-                </div>
               </div>
             </div>
           </div>
