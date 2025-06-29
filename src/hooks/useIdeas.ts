@@ -52,10 +52,11 @@ const ITEMS_PER_PAGE = 12;
 
 export const useIdeas = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with true for initial load
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [initialized, setInitialized] = useState(false);
   const [filters, setFilters] = useState<IdeaFilters>({
     min_score: 0,
     max_score: 100,
@@ -130,7 +131,8 @@ export const useIdeas = () => {
 
   const fetchIdeas = useCallback(
     async (page: number = 0, reset: boolean = false) => {
-      if (loading) return;
+      // Prevent multiple simultaneous requests
+      if (loading && initialized) return;
 
       setLoading(true);
       setError(null);
@@ -157,22 +159,26 @@ export const useIdeas = () => {
         setError(err instanceof Error ? err.message : 'Failed to fetch ideas');
       } finally {
         setLoading(false);
+        if (!initialized) {
+          setInitialized(true);
+        }
       }
     },
-    [buildQuery, filters, loading],
+    [buildQuery, filters, loading, initialized],
   );
 
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
+    if (!loading && hasMore && initialized) {
       fetchIdeas(currentPage + 1, false);
     }
-  }, [fetchIdeas, currentPage, loading, hasMore]);
+  }, [fetchIdeas, currentPage, loading, hasMore, initialized]);
 
   const applyFilters = useCallback((newFilters: IdeaFilters) => {
     setFilters(newFilters);
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
+    setInitialized(false); // Reset initialization for new filter
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -187,10 +193,12 @@ export const useIdeas = () => {
     applyFilters(defaultFilters);
   }, [applyFilters]);
 
-  // Initial fetch
+  // Initial fetch - only run once on mount
   useEffect(() => {
-    fetchIdeas(0, true);
-  }, [filters]);
+    if (!initialized) {
+      fetchIdeas(0, true);
+    }
+  }, [filters, initialized, fetchIdeas]);
 
   return {
     ideas,
@@ -198,6 +206,7 @@ export const useIdeas = () => {
     hasMore,
     error,
     filters,
+    initialized,
     loadMore,
     applyFilters,
     resetFilters,

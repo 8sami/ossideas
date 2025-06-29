@@ -43,6 +43,7 @@ const MainContent: React.FC<MainContentProps> = ({
     loading,
     hasMore,
     error,
+    initialized,
     loadMore,
     applyFilters: applyIdeaFiltersFromHook,
   } = useIdeas();
@@ -51,10 +52,6 @@ const MainContent: React.FC<MainContentProps> = ({
   const { submissions } = useSubmissions();
 
   const lastIdeaElementRef = useRef<HTMLDivElement>(null);
-
-  // Track if this is the initial load to prevent flickering
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
@@ -78,21 +75,13 @@ const MainContent: React.FC<MainContentProps> = ({
     [hasActiveFilters, filters.appliedSections],
   );
 
-  // Track loading states more precisely
-  useEffect(() => {
-    if (!loading && ideas.length > 0 && isInitialLoad) {
-      setIsInitialLoad(false);
-      setHasLoadedOnce(true);
-    }
-  }, [loading, ideas.length, isInitialLoad]);
-
   // Sync MainContent filters with useIdeas hook
   useEffect(() => {
     const ideaFilters: IdeaFilters = {
       min_score: filters.opportunityScore[0],
       max_score: filters.opportunityScore[1],
-      is_premium: null, // We don't filter by premium status in the UI currently
-      status: [], // We don't filter by status in the UI currently
+      is_premium: null,
+      status: [],
       search_query: searchQuery,
       repository_topics: filters.categories,
     };
@@ -102,7 +91,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Infinite scroll observer
   useEffect(() => {
-    if (loading || !hasLoadedOnce) return;
+    if (loading || !initialized) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -122,7 +111,7 @@ const MainContent: React.FC<MainContentProps> = ({
         observer.unobserve(lastIdeaElementRef.current);
       }
     };
-  }, [loading, hasMore, loadMore, hasLoadedOnce]);
+  }, [loading, hasMore, loadMore, initialized]);
 
   // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
@@ -182,7 +171,7 @@ const MainContent: React.FC<MainContentProps> = ({
   };
 
   // Show full screen loader only during initial load
-  if (isInitialLoad && loading && ideas.length === 0) {
+  if (!initialized && loading) {
     return <FullScreenLoader message="Loading amazing ideas for you..." />;
   }
 
@@ -284,8 +273,8 @@ const MainContent: React.FC<MainContentProps> = ({
           </section>
         )}
 
-        {/* Content Sections - Only show if we have data or are not in initial loading */}
-        {(hasLoadedOnce || ideas.length > 0) && (
+        {/* Content Sections - Only show if initialized */}
+        {initialized && (
           <>
             {/* Trending Ideas Section */}
             <section className="mb-12">
@@ -427,8 +416,8 @@ const MainContent: React.FC<MainContentProps> = ({
           </>
         )}
 
-        {/* Empty state - only show if we've loaded and have no data */}
-        {hasLoadedOnce && ideas.length === 0 && !loading && !error && (
+        {/* Empty state - only show if initialized and no data */}
+        {initialized && ideas.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <Zap className="h-12 w-12 text-gray-400" />
