@@ -74,20 +74,12 @@ const MainContent: React.FC<MainContentProps> = ({
     );
   }, [searchQuery, filters]);
 
-  // Helper function to check if a section should be displayed
-  const shouldShowSection = useCallback(
-    (sectionId: string) => {
-      return filters.appliedSections?.includes(sectionId) ?? true;
-    },
-    [filters.appliedSections],
-  );
-
   // Helper function to check if a section should be filtered
   const shouldFilterSection = useCallback(
     (sectionId: string) => {
-      return hasActiveFilters && shouldShowSection(sectionId);
+      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
     },
-    [hasActiveFilters, shouldShowSection],
+    [hasActiveFilters, filters.appliedSections],
   );
 
   // Convert FilterOptions to IdeaFilters format
@@ -315,123 +307,117 @@ const MainContent: React.FC<MainContentProps> = ({
         {initialized && (
           <>
             {/* Trending Ideas Section - Show 4 items sorted by highest teardown score */}
-            {shouldShowSection('trending') && (
-              <section className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      🔥 Trending Ideas
-                    </h2>
-                    <p className="text-gray-600">
-                      {getSectionDescription('trending', trendingIdeas.length)}
-                    </p>
-                  </div>
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    🔥 Trending Ideas
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('trending', trendingIdeas.length)}
+                  </p>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {trendingIdeas.map((idea) => (
-                    <IdeaCard
-                      key={idea.id}
-                      idea={idea}
-                      onClick={() => handleIdeaSelect(idea)}
-                      onRegisterClick={onRegisterClick}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {trendingIdeas.map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    onClick={() => handleIdeaSelect(idea)}
+                    onRegisterClick={onRegisterClick}
+                  />
+                ))}
+              </div>
+            </section>
 
             {/* Community Picks Section - Show 4 items sorted by most stars */}
-            {shouldShowSection('community') && (
-              <section className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      👥 Community Picks
-                    </h2>
-                    <p className="text-gray-600">
-                      {getSectionDescription('community', communityPicks.length)}
-                    </p>
-                  </div>
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    👥 Community Picks
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('community', communityPicks.length)}
+                  </p>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {communityPicks.map((idea) => (
-                    <IdeaCard
-                      key={idea.id}
-                      idea={idea}
-                      onClick={() => handleIdeaSelect(idea)}
-                      onRegisterClick={onRegisterClick}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {communityPicks.map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    onClick={() => handleIdeaSelect(idea)}
+                    onRegisterClick={onRegisterClick}
+                  />
+                ))}
+              </div>
+            </section>
 
             {/* Discovery Section with Infinite Scroll - Sorted by created date (newest first) */}
-            {shouldShowSection('discovery') && (
-              <section className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      🔍 Discover Ideas
-                    </h2>
-                    <p className="text-gray-600">
-                      {getSectionDescription('discovery', discoveryIdeas.length)}
-                    </p>
-                  </div>
-                  {loading && convertedIdeas.length > 0 && (
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-                  )}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    🔍 Discover Ideas
+                  </h2>
+                  <p className="text-gray-600">
+                    {getSectionDescription('discovery', discoveryIdeas.length)}
+                  </p>
                 </div>
+                {loading && convertedIdeas.length > 0 && (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                )}
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {discoveryIdeas.map((idea, index) => {
-                    if (discoveryIdeas.length === index + 1) {
-                      return (
-                        <div key={idea.id} ref={lastIdeaElementRef}>
-                          <IdeaCard
-                            idea={idea}
-                            onClick={() => handleIdeaSelect(idea)}
-                            onRegisterClick={onRegisterClick}
-                          />
-                        </div>
-                      );
-                    } else {
-                      return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {discoveryIdeas.map((idea, index) => {
+                  if (discoveryIdeas.length === index + 1) {
+                    return (
+                      <div key={idea.id} ref={lastIdeaElementRef}>
                         <IdeaCard
-                          key={idea.id}
                           idea={idea}
                           onClick={() => handleIdeaSelect(idea)}
                           onRegisterClick={onRegisterClick}
                         />
-                      );
-                    }
-                  })}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <IdeaCard
+                        key={idea.id}
+                        idea={idea}
+                        onClick={() => handleIdeaSelect(idea)}
+                        onRegisterClick={onRegisterClick}
+                      />
+                    );
+                  }
+                })}
+              </div>
+
+              {error && (
+                <div className="text-center mt-8">
+                  <p className="text-red-600">Error loading ideas: {error}</p>
                 </div>
+              )}
 
-                {error && (
-                  <div className="text-center mt-8">
-                    <p className="text-red-600">Error loading ideas: {error}</p>
-                  </div>
-                )}
+              {/* Loading indicator for infinite scroll */}
+              {loading && convertedIdeas.length > 0 && (
+                <div className="text-center mt-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                  <p className="text-gray-600 mt-2">Loading more ideas...</p>
+                </div>
+              )}
 
-                {/* Loading indicator for infinite scroll */}
-                {loading && convertedIdeas.length > 0 && (
-                  <div className="text-center mt-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-                    <p className="text-gray-600 mt-2">Loading more ideas...</p>
-                  </div>
-                )}
-
-                {/* End of results indicator */}
-                {!loading && !hasMore && convertedIdeas.length > 0 && (
-                  <div className="text-center mt-8">
-                    <p className="text-gray-600">You've reached the end! 🎉</p>
-                  </div>
-                )}
-              </section>
-            )}
+              {/* End of results indicator */}
+              {!loading && !hasMore && convertedIdeas.length > 0 && (
+                <div className="text-center mt-8">
+                  <p className="text-gray-600">You've reached the end! 🎉</p>
+                </div>
+              )}
+            </section>
           </>
         )}
 
