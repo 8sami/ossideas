@@ -209,7 +209,9 @@ export const useIdeas = () => {
             } else {
               // No ideas match the category filter, return empty result
               if (!signal.aborted) {
-                setIdeas([]);
+                if (reset) {
+                  setIdeas([]);
+                }
                 setHasMore(false);
                 setLoading(false);
                 if (!initialized) {
@@ -243,7 +245,9 @@ export const useIdeas = () => {
             } else {
               // No ideas match the industry filter, return empty result
               if (!signal.aborted) {
-                setIdeas([]);
+                if (reset) {
+                  setIdeas([]);
+                }
                 setHasMore(false);
                 setLoading(false);
                 if (!initialized) {
@@ -261,7 +265,9 @@ export const useIdeas = () => {
             // If intersection is empty, return empty result
             if (filteredIdeaIds.length === 0) {
               if (!signal.aborted) {
-                setIdeas([]);
+                if (reset) {
+                  setIdeas([]);
+                }
                 setHasMore(false);
                 setLoading(false);
                 if (!initialized) {
@@ -343,10 +349,15 @@ export const useIdeas = () => {
   const applyFilters = useCallback((newFilters: IdeaFilters) => {
     setFilters(newFilters);
     setCurrentPage(0);
-    setIdeas([]);
     setHasMore(true);
-    setInitialized(false); // Reset initialization for new filter
-  }, []);
+    // Don't clear ideas immediately - let fetchIdeas handle the reset
+    // This prevents the blank screen while new data loads
+    setInitialized(false);
+    // Trigger immediate fetch with reset=true to replace current ideas
+    setTimeout(() => {
+      fetchIdeas(0, true);
+    }, 0);
+  }, [fetchIdeas]);
 
   const resetFilters = useCallback(() => {
     const defaultFilters: IdeaFilters = {
