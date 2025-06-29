@@ -129,17 +129,73 @@ const MainContent: React.FC<MainContentProps> = ({
   // Helper function to check if a section should be filtered
   const shouldFilterSection = useCallback(
     (sectionId: string) => {
-      // If no active filters, nothing to filter
-      if (!hasActiveFilters) return false;
-      
-      // If no sections are selected, don't apply filters to any section
-      if (!filters.appliedSections || filters.appliedSections.length === 0) return false;
-      
-      // Only apply filters to selected sections
-      return filters.appliedSections.includes(sectionId);
+      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
     },
     [hasActiveFilters, filters.appliedSections],
   );
+
+  // Helper function to apply filters to ideas
+  const applyFiltersToIdeas = useCallback((ideas: IdeaData[], shouldFilter: boolean) => {
+    if (!shouldFilter) {
+      return ideas; // Return unfiltered ideas
+    }
+
+    let filtered = ideas;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(idea =>
+        idea.title.toLowerCase().includes(query) ||
+        idea.tagline.toLowerCase().includes(query) ||
+        idea.description.toLowerCase().includes(query) ||
+        idea.ossProject.toLowerCase().includes(query) ||
+        idea.categories.some(cat => cat.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply category filter
+    if (filters.categories.length > 0) {
+      filtered = filtered.filter(idea =>
+        idea.categories.some(cat => filters.categories.includes(cat))
+      );
+    }
+
+    // Apply industry filter
+    if (filters.industries.length > 0) {
+      filtered = filtered.filter(idea =>
+        idea.industries?.some(ind => filters.industries.includes(ind))
+      );
+    }
+
+    // Apply license filter
+    if (filters.license.length > 0) {
+      filtered = filtered.filter(idea =>
+        filters.license.includes(idea.license)
+      );
+    }
+
+    // Apply opportunity score filter
+    filtered = filtered.filter(idea =>
+      idea.opportunityScore >= filters.opportunityScore[0] &&
+      idea.opportunityScore <= filters.opportunityScore[1]
+    );
+
+    // Apply special filters
+    if (filters.isNew) {
+      filtered = filtered.filter(idea => idea.isNew);
+    }
+
+    if (filters.isTrending) {
+      filtered = filtered.filter(idea => idea.isTrending);
+    }
+
+    if (filters.communityPick) {
+      filtered = filtered.filter(idea => idea.communityPick);
+    }
+
+    return filtered;
+  }, [searchQuery, filters]);
 
   // Find the top 4 ideas with highest teardown scores to mark as trending
   const topTrendingIdeasIds = useMemo(() => {
@@ -154,167 +210,46 @@ const MainContent: React.FC<MainContentProps> = ({
       .map(idea => idea.id);
   }, [ideas]);
 
-  // Filter ideas for different sections
+  // Filter ideas for different sections based on "Apply to Sections" setting
   const trendingIdeas = useMemo(() => {
-    // Start with all ideas
-    let allIdeas = convertedIdeas;
-    
-    // First, filter to only include ideas with high teardown scores (top 4)
-    const trendingIdeasList = allIdeas.filter(idea => 
-      topTrendingIdeasIds.includes(idea.id)
-    );
-    
-    // If this section should be filtered, apply the filters
-    if (shouldFilterSection('trending')) {
-      // Apply category filter
-      if (filters.categories.length > 0) {
-        trendingIdeasList = trendingIdeasList.filter(idea =>
-          idea.categories.some(cat => filters.categories.includes(cat))
-        );
-      }
-      
-      // Apply industry filter
-      if (filters.industries.length > 0) {
-        trendingIdeasList = trendingIdeasList.filter(idea =>
-          idea.industries?.some(ind => filters.industries.includes(ind))
-        );
-      }
-      
-      // Apply license filter
-      if (filters.license.length > 0) {
-        trendingIdeasList = trendingIdeasList.filter(idea =>
-          filters.license.includes(idea.license)
-        );
-      }
-      
-      // Apply opportunity score filter
-      trendingIdeasList = trendingIdeasList.filter(idea =>
-        idea.opportunityScore >= filters.opportunityScore[0] &&
-        idea.opportunityScore <= filters.opportunityScore[1]
-      );
-      
-      // Apply search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        trendingIdeasList = trendingIdeasList.filter(idea =>
-          idea.title.toLowerCase().includes(query) ||
-          idea.tagline.toLowerCase().includes(query) ||
-          idea.description.toLowerCase().includes(query) ||
-          idea.ossProject.toLowerCase().includes(query) ||
-          idea.categories.some(cat => cat.toLowerCase().includes(query))
-        );
-      }
-    }
-    
-    return trendingIdeasList;
-  }, [convertedIdeas, topTrendingIdeasIds, shouldFilterSection, filters, searchQuery]);
+    // Get top 4 ideas with highest teardown scores for trending
+    const sortedByScore = [...convertedIdeas]
+      .sort((a, b) => {
+        // Get the original idea data to access overall_teardown_score
+        const ideaA = ideas.find(idea => idea.id === a.id);
+        const ideaB = ideas.find(idea => idea.id === b.id);
+        const scoreA = ideaA?.overall_teardown_score || 0;
+        const scoreB = ideaB?.overall_teardown_score || 0;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4); // Take top 4
+
+    // Apply filters if this section is selected for filtering
+    return applyFiltersToIdeas(sortedByScore, shouldFilterSection('trending'));
+  }, [convertedIdeas, ideas, shouldFilterSection, applyFiltersToIdeas]);
 
   const communityPicks = useMemo(() => {
-    // Start with all ideas that are community picks
-    let communityIdeas = convertedIdeas.filter((idea) => idea.communityPick);
+    let filtered = convertedIdeas.filter((idea) => idea.communityPick);
     
     // Sort by repository stars (highest first) and take top 4
-    communityIdeas = communityIdeas
+    filtered = filtered
       .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
       .slice(0, 4);
-    
-    // If this section should be filtered, apply the filters
-    if (shouldFilterSection('community')) {
-      // Apply category filter
-      if (filters.categories.length > 0) {
-        communityIdeas = communityIdeas.filter(idea =>
-          idea.categories.some(cat => filters.categories.includes(cat))
-        );
-      }
-      
-      // Apply industry filter
-      if (filters.industries.length > 0) {
-        communityIdeas = communityIdeas.filter(idea =>
-          idea.industries?.some(ind => filters.industries.includes(ind))
-        );
-      }
-      
-      // Apply license filter
-      if (filters.license.length > 0) {
-        communityIdeas = communityIdeas.filter(idea =>
-          filters.license.includes(idea.license)
-        );
-      }
-      
-      // Apply opportunity score filter
-      communityIdeas = communityIdeas.filter(idea =>
-        idea.opportunityScore >= filters.opportunityScore[0] &&
-        idea.opportunityScore <= filters.opportunityScore[1]
-      );
-      
-      // Apply search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        communityIdeas = communityIdeas.filter(idea =>
-          idea.title.toLowerCase().includes(query) ||
-          idea.tagline.toLowerCase().includes(query) ||
-          idea.description.toLowerCase().includes(query) ||
-          idea.ossProject.toLowerCase().includes(query) ||
-          idea.categories.some(cat => cat.toLowerCase().includes(query))
-        );
-      }
-    }
-    
-    return communityIdeas;
-  }, [convertedIdeas, shouldFilterSection, filters, searchQuery]);
+
+    // Apply filters if this section is selected for filtering
+    return applyFiltersToIdeas(filtered, shouldFilterSection('community'));
+  }, [convertedIdeas, shouldFilterSection, applyFiltersToIdeas]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
   const discoveryIdeas = useMemo(() => {
-    // Start with all ideas sorted by date
-    let allIdeas = [...convertedIdeas].sort((a, b) => {
+    const sorted = [...convertedIdeas].sort((a, b) => {
       if (!a.generatedAt || !b.generatedAt) return 0;
       return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
     });
-    
-    // If this section should be filtered, apply the filters
-    if (shouldFilterSection('discovery')) {
-      // Apply category filter
-      if (filters.categories.length > 0) {
-        allIdeas = allIdeas.filter(idea =>
-          idea.categories.some(cat => filters.categories.includes(cat))
-        );
-      }
-      
-      // Apply industry filter
-      if (filters.industries.length > 0) {
-        allIdeas = allIdeas.filter(idea =>
-          idea.industries?.some(ind => filters.industries.includes(ind))
-        );
-      }
-      
-      // Apply license filter
-      if (filters.license.length > 0) {
-        allIdeas = allIdeas.filter(idea =>
-          filters.license.includes(idea.license)
-        );
-      }
-      
-      // Apply opportunity score filter
-      allIdeas = allIdeas.filter(idea =>
-        idea.opportunityScore >= filters.opportunityScore[0] &&
-        idea.opportunityScore <= filters.opportunityScore[1]
-      );
-      
-      // Apply search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        allIdeas = allIdeas.filter(idea =>
-          idea.title.toLowerCase().includes(query) ||
-          idea.tagline.toLowerCase().includes(query) ||
-          idea.description.toLowerCase().includes(query) ||
-          idea.ossProject.toLowerCase().includes(query) ||
-          idea.categories.some(cat => cat.toLowerCase().includes(query))
-        );
-      }
-    }
-    
-    return allIdeas;
-  }, [convertedIdeas, shouldFilterSection, filters, searchQuery]);
+
+    // Apply filters if this section is selected for filtering
+    return applyFiltersToIdeas(sorted, shouldFilterSection('discovery'));
+  }, [convertedIdeas, shouldFilterSection, applyFiltersToIdeas]);
 
   // Handle idea selection - navigate to idea detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -450,7 +385,7 @@ const MainContent: React.FC<MainContentProps> = ({
         {/* Content Sections - Only show if initialized */}
         {initialized && (
           <>
-            {/* Trending Ideas Section - Show 4 items with highest teardown score */}
+            {/* Trending Ideas Section - Show 4 items with highest teardown scores */}
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
