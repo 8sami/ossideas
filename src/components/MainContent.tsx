@@ -222,23 +222,36 @@ const MainContent: React.FC<MainContentProps> = ({
       return scoreB - scoreA;
     });
     
+    // Mark the top ideas as trending (for the 'Hot' badge)
+    const markedIdeas = sortedIdeas.map((idea, index) => ({
+      ...idea,
+      isTrending: index < 4 // Top 4 ideas by score are marked as trending
+    }));
+    
     // Apply filters if this section is selected for filtering
-    const filtered = filterIdeasForSection(sortedIdeas, 'trending');
+    const filtered = filterIdeasForSection(markedIdeas, 'trending');
     
     // Take top 4
     return filtered.slice(0, 4);
   }, [convertedIdeas, ideas, filterIdeasForSection]);
 
   const communityPicks = useMemo(() => {
-    let baseIdeas = convertedIdeas.filter((idea) => idea.communityPick);
+    // Sort all ideas by repository star count (highest first)
+    const sortedByStars = [...convertedIdeas].sort(
+      (a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0)
+    );
+    
+    // Mark the top ideas as community picks
+    const markedIdeas = sortedByStars.map((idea, index) => ({
+      ...idea,
+      communityPick: index < 4 // Top 4 ideas by stars are marked as community picks
+    }));
     
     // Apply filters if this section is selected for filtering
-    const filtered = filterIdeasForSection(baseIdeas, 'community');
+    const filtered = filterIdeasForSection(markedIdeas, 'community');
     
-    // Sort by repository stars (highest first) and take top 4
-    return filtered
-      .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
-      .slice(0, 4);
+    // Take top 4
+    return filtered.slice(0, 4);
   }, [convertedIdeas, filterIdeasForSection]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
@@ -270,7 +283,7 @@ const MainContent: React.FC<MainContentProps> = ({
       case 'trending':
         return `${currentCount} ideas with highest teardown scores`;
       case 'community':
-        return `${currentCount} community favorites with strong adoption`;
+        return `${currentCount} ideas with highest repository star counts`;
       case 'discovery':
         return `Curated startup opportunities from open source projects`;
       default:
@@ -392,7 +405,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     🔥 Trending Ideas
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('trending', trendingIdeas.length, convertedIdeas.length)}
+                    {getSectionDescription('trending', trendingIdeas.length, 4)}
                   </p>
                 </div>
               </div>
@@ -417,7 +430,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     👥 Community Picks
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('community', communityPicks.length, convertedIdeas.filter(idea => idea.communityPick).length)}
+                    {getSectionDescription('community', communityPicks.length, 4)}
                   </p>
                 </div>
               </div>
