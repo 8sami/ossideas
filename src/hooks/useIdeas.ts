@@ -75,10 +75,6 @@ export const useIdeas = () => {
     license_names: [],
   });
 
-  // AbortController ref to manage request cancellation
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const isInitialLoadRef = useRef(true);
-
   const buildQuery = useCallback(
     (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
       let query = supabase
@@ -160,28 +156,13 @@ export const useIdeas = () => {
 
   const fetchIdeas = useCallback(
     async (page: number = 0, reset: boolean = false) => {
-      // Only abort previous requests if this is not the initial load and we have an existing controller
-      if (abortControllerRef.current && !isInitialLoadRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // Create new AbortController for this request
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-      const { signal } = abortController;
-
-      // Prevent multiple simultaneous requests (except for initial load)
+      // Prevent multiple simultaneous requests
       if (loading && initialized) return;
 
       setLoading(true);
       setError(null);
 
       try {
-        // Check if request was aborted before starting
-        if (signal.aborted) {
-          return;
-        }
-
         // Pre-filter by categories and industries if needed
         let filteredIdeaIds: string[] | null = null;
 
@@ -196,10 +177,6 @@ export const useIdeas = () => {
               .in('category_name', filters.idea_categories);
 
             if (categoryError) {
-              // Check if error is due to abort
-              if (signal.aborted) {
-                return;
-              }
               console.error('Error fetching category idea IDs:', categoryError);
               throw new Error('Failed to filter by categories');
             }
@@ -208,13 +185,11 @@ export const useIdeas = () => {
               categoryIdeaIds = [...new Set(categoryData.map(item => item.idea_id))];
             } else {
               // No ideas match the category filter, return empty result
-              if (!signal.aborted) {
-                setIdeas([]);
-                setHasMore(false);
-                setLoading(false);
-                if (!initialized) {
-                  setInitialized(true);
-                }
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
               }
               return;
             }
@@ -229,10 +204,6 @@ export const useIdeas = () => {
               .in('industry_name', filters.idea_industries);
 
             if (industryError) {
-              // Check if error is due to abort
-              if (signal.aborted) {
-                return;
-              }
               console.error('Error fetching industry idea IDs:', industryError);
               throw new Error('Failed to filter by industries');
             }
@@ -241,13 +212,11 @@ export const useIdeas = () => {
               industryIdeaIds = [...new Set(industryData.map(item => item.idea_id))];
             } else {
               // No ideas match the industry filter, return empty result
-              if (!signal.aborted) {
-                setIdeas([]);
-                setHasMore(false);
-                setLoading(false);
-                if (!initialized) {
-                  setInitialized(true);
-                }
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
               }
               return;
             }
@@ -259,13 +228,11 @@ export const useIdeas = () => {
             
             // If intersection is empty, return empty result
             if (filteredIdeaIds.length === 0) {
-              if (!signal.aborted) {
-                setIdeas([]);
-                setHasMore(false);
-                setLoading(false);
-                if (!initialized) {
-                  setInitialized(true);
-                }
+              setIdeas([]);
+              setHasMore(false);
+              setLoading(false);
+              if (!initialized) {
+                setInitialized(true);
               }
               return;
             }
@@ -275,33 +242,11 @@ export const useIdeas = () => {
           }
         }
 
-        // Check if request was aborted before main query
-        if (signal.aborted) {
-          return;
-        }
-
-        // Build the query
-        let query = buildQuery(page, filters, filteredIdeaIds);
-        
-        // Only add abort signal for non-initial loads
-        if (!isInitialLoadRef.current) {
-          query = query.abortSignal(signal);
-        }
-        
         // Now fetch the ideas with all filters applied
-        const { data, error: fetchError } = await query;
+        const { data, error: fetchError } = await buildQuery(page, filters, filteredIdeaIds);
 
         if (fetchError) {
-          // Check if error is due to abort
-          if (signal.aborted || fetchError.message?.includes('aborted')) {
-            return;
-          }
           throw fetchError;
-        }
-
-        // Check if request was aborted before setting state
-        if (signal.aborted) {
-          return;
         }
 
         if (data) {
@@ -315,21 +260,12 @@ export const useIdeas = () => {
           setCurrentPage(page);
         }
       } catch (err) {
-        // Don't set error state for aborted requests
-        if (signal.aborted || (err instanceof Error && (err.name === 'AbortError' || err.message?.includes('aborted')))) {
-          return;
-        }
-        
         console.error('Error fetching ideas:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch ideas');
       } finally {
-        // Only update loading state if request wasn't aborted
-        if (!signal.aborted) {
-          setLoading(false);
-          if (!initialized) {
-            setInitialized(true);
-            isInitialLoadRef.current = false;
-          }
+        setLoading(false);
+        if (!initialized) {
+          setInitialized(true);
         }
       }
     },
@@ -347,7 +283,6 @@ export const useIdeas = () => {
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
-    // Let the state change trigger the fetch automatically
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -364,16 +299,7 @@ export const useIdeas = () => {
     applyFilters(defaultFilters);
   }, [applyFilters]);
 
-  // Cleanup function to abort requests on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
-
-  // Initial fetch - only run once on mount with empty dependency array
+  // Initial fetch - only run once on mount
   useEffect(() => {
     if (!initialized) {
       fetchIdeas(0, true);
