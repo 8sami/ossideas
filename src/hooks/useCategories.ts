@@ -9,13 +9,10 @@ export interface Category {
 
 export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
 
   const fetchCategories = async () => {
-    if (initialized) return; // Don't fetch if already initialized
-    
     setLoading(true);
     setError(null);
 
@@ -30,7 +27,6 @@ export const useCategories = () => {
       }
 
       setCategories(data || []);
-      setInitialized(true);
     } catch (err) {
       console.error('Error fetching categories:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch categories');
@@ -47,9 +43,6 @@ export const useCategories = () => {
     categories,
     loading,
     error,
-    refetch: () => {
-      setInitialized(false);
-      fetchCategories();
-    },
+    refetch: fetchCategories,
   };
 };
