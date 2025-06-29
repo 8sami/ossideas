@@ -158,7 +158,10 @@ export const useIdeas = () => {
   );
 
   const fetchIdeas = useCallback(
-    async (page: number = 0, reset: boolean = false) => {
+    async (page: number = 0, reset: boolean = false, newFilters?: IdeaFilters) => {
+      // Use provided filters or fall back to state filters
+      const currentFilters = newFilters || filters;
+      
       // Only abort if we have an existing controller and we're not on initial load
       if (abortControllerRef.current && initialized) {
         abortControllerRef.current.abort();
@@ -185,14 +188,14 @@ export const useIdeas = () => {
         let filteredIdeaIds: string[] | null = null;
 
         // If we have category or industry filters, we need to pre-fetch the idea IDs
-        if (filters.idea_categories.length > 0 || filters.idea_industries.length > 0) {
+        if (currentFilters.idea_categories.length > 0 || currentFilters.idea_industries.length > 0) {
           // Get idea IDs that match category filters
           let categoryIdeaIds: string[] | null = null;
-          if (filters.idea_categories.length > 0) {
+          if (currentFilters.idea_categories.length > 0) {
             const { data: categoryData, error: categoryError } = await supabase
               .from('auto_idea_category')
               .select('idea_id')
-              .in('category_name', filters.idea_categories)
+              .in('category_name', currentFilters.idea_categories)
               .abortSignal(signal);
 
             if (categoryError) {
@@ -222,11 +225,11 @@ export const useIdeas = () => {
 
           // Get idea IDs that match industry filters
           let industryIdeaIds: string[] | null = null;
-          if (filters.idea_industries.length > 0) {
+          if (currentFilters.idea_industries.length > 0) {
             const { data: industryData, error: industryError } = await supabase
               .from('auto_idea_industry')
               .select('idea_id')
-              .in('industry_name', filters.idea_industries)
+              .in('industry_name', currentFilters.idea_industries)
               .abortSignal(signal);
 
             if (industryError) {
@@ -282,7 +285,7 @@ export const useIdeas = () => {
         }
 
         // Build the query without abort signal first
-        const query = buildQuery(page, filters, filteredIdeaIds);
+        const query = buildQuery(page, currentFilters, filteredIdeaIds);
         
         // Add abort signal only if we're not on initial load or if initialized
         const finalQuery = initialized ? query.abortSignal(signal) : query;
@@ -345,8 +348,9 @@ export const useIdeas = () => {
     setCurrentPage(0);
     setIdeas([]);
     setHasMore(true);
-    setInitialized(false); // Reset initialization for new filter
-  }, []);
+    // Don't reset initialized - directly call fetchIdeas with new filters
+    fetchIdeas(0, true, newFilters);
+  }, [fetchIdeas]);
 
   const resetFilters = useCallback(() => {
     const defaultFilters: IdeaFilters = {
@@ -371,12 +375,12 @@ export const useIdeas = () => {
     };
   }, []);
 
-  // Initial fetch - only run once on mount
+  // Initial fetch - only run once on mount with empty dependency array
   useEffect(() => {
     if (!initialized) {
       fetchIdeas(0, true);
     }
-  }, [filters, initialized, fetchIdeas]);
+  }, []); // Empty dependency array - only run once on mount
 
   return {
     ideas,
