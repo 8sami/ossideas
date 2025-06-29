@@ -35,7 +35,6 @@ const MainContent: React.FC<MainContentProps> = ({
     isNew: false,
     isTrending: false,
     communityPick: false,
-    appliedSections: ['trending', 'community', 'discovery'],
   });
 
   // Use the ideas hook for all data
@@ -111,92 +110,6 @@ const MainContent: React.FC<MainContentProps> = ({
     };
   }, [loading, hasMore, loadMore, initialized]);
 
-  // Check if filters are active
-  const hasActiveFilters = useMemo(() => {
-    return (
-      searchQuery.trim() !== '' ||
-      filters.categories.length > 0 ||
-      filters.industries.length > 0 ||
-      filters.license.length > 0 ||
-      filters.opportunityScore[0] > 0 ||
-      filters.opportunityScore[1] < 100 ||
-      filters.isNew ||
-      filters.isTrending ||
-      filters.communityPick
-    );
-  }, [searchQuery, filters]);
-
-  // Helper function to check if a section should be filtered
-  const shouldFilterSection = useCallback(
-    (sectionId: string) => {
-      return hasActiveFilters && filters.appliedSections?.includes(sectionId);
-    },
-    [hasActiveFilters, filters.appliedSections],
-  );
-
-  // Helper function to apply filters to ideas
-  const applyFiltersToIdeas = useCallback((ideas: IdeaData[], shouldFilter: boolean) => {
-    if (!shouldFilter) {
-      return ideas; // Return unfiltered ideas
-    }
-
-    let filtered = ideas;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(idea =>
-        idea.title.toLowerCase().includes(query) ||
-        idea.tagline.toLowerCase().includes(query) ||
-        idea.description.toLowerCase().includes(query) ||
-        idea.ossProject.toLowerCase().includes(query) ||
-        idea.categories.some(cat => cat.toLowerCase().includes(query))
-      );
-    }
-
-    // Apply category filter
-    if (filters.categories.length > 0) {
-      filtered = filtered.filter(idea =>
-        idea.categories.some(cat => filters.categories.includes(cat))
-      );
-    }
-
-    // Apply industry filter
-    if (filters.industries.length > 0) {
-      filtered = filtered.filter(idea =>
-        idea.industries?.some(ind => filters.industries.includes(ind))
-      );
-    }
-
-    // Apply license filter
-    if (filters.license.length > 0) {
-      filtered = filtered.filter(idea =>
-        filters.license.includes(idea.license)
-      );
-    }
-
-    // Apply opportunity score filter
-    filtered = filtered.filter(idea =>
-      idea.opportunityScore >= filters.opportunityScore[0] &&
-      idea.opportunityScore <= filters.opportunityScore[1]
-    );
-
-    // Apply special filters
-    if (filters.isNew) {
-      filtered = filtered.filter(idea => idea.isNew);
-    }
-
-    if (filters.isTrending) {
-      filtered = filtered.filter(idea => idea.isTrending);
-    }
-
-    if (filters.communityPick) {
-      filtered = filtered.filter(idea => idea.communityPick);
-    }
-
-    return filtered;
-  }, [searchQuery, filters]);
-
   // Find the top 4 ideas with highest teardown scores to mark as trending
   const topTrendingIdeasIds = useMemo(() => {
     // Sort all ideas by teardown score and get top 4 IDs
@@ -210,10 +123,10 @@ const MainContent: React.FC<MainContentProps> = ({
       .map(idea => idea.id);
   }, [ideas]);
 
-  // Filter ideas for different sections based on "Apply to Sections" setting
+  // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
     // Get top 4 ideas with highest teardown scores for trending
-    const sortedByScore = [...convertedIdeas]
+    return [...convertedIdeas]
       .sort((a, b) => {
         // Get the original idea data to access overall_teardown_score
         const ideaA = ideas.find(idea => idea.id === a.id);
@@ -223,33 +136,24 @@ const MainContent: React.FC<MainContentProps> = ({
         return scoreB - scoreA;
       })
       .slice(0, 4); // Take top 4
-
-    // Apply filters if this section is selected for filtering
-    return applyFiltersToIdeas(sortedByScore, shouldFilterSection('trending'));
-  }, [convertedIdeas, ideas, shouldFilterSection, applyFiltersToIdeas]);
+  }, [convertedIdeas, ideas]);
 
   const communityPicks = useMemo(() => {
     let filtered = convertedIdeas.filter((idea) => idea.communityPick);
     
     // Sort by repository stars (highest first) and take top 4
-    filtered = filtered
+    return filtered
       .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
       .slice(0, 4);
-
-    // Apply filters if this section is selected for filtering
-    return applyFiltersToIdeas(filtered, shouldFilterSection('community'));
-  }, [convertedIdeas, shouldFilterSection, applyFiltersToIdeas]);
+  }, [convertedIdeas]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
   const discoveryIdeas = useMemo(() => {
-    const sorted = [...convertedIdeas].sort((a, b) => {
+    return [...convertedIdeas].sort((a, b) => {
       if (!a.generatedAt || !b.generatedAt) return 0;
       return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
     });
-
-    // Apply filters if this section is selected for filtering
-    return applyFiltersToIdeas(sorted, shouldFilterSection('discovery'));
-  }, [convertedIdeas, shouldFilterSection, applyFiltersToIdeas]);
+  }, [convertedIdeas]);
 
   // Handle idea selection - navigate to idea detail page
   const handleIdeaSelect = (idea: IdeaData) => {
@@ -258,14 +162,6 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Helper function to get section description
   const getSectionDescription = (sectionId: string, currentCount: number) => {
-    const isFiltered = shouldFilterSection(sectionId);
-
-    if (hasActiveFilters && isFiltered) {
-      return `${currentCount} ${
-        currentCount === 1 ? 'result' : 'results'
-      } match your filters`;
-    }
-
     // Descriptive counts for sections
     switch (sectionId) {
       case 'trending':

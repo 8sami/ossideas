@@ -17,12 +17,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   const { licenses, loading: licensesLoading } = useLicenses();
   const { industries, loading: industriesLoading } = useIndustries();
 
-  const sections = [
-    { id: 'trending', label: 'Trending Ideas', icon: '🔥' },
-    { id: 'community', label: 'Community Picks', icon: '👥' },
-    { id: 'discovery', label: 'Discover Ideas', icon: '🔍' }
-  ];
-
   const handleCategoryToggle = (category: string) => {
     const newCategories = filters.categories.includes(category)
       ? filters.categories.filter(c => c !== category)
@@ -47,15 +41,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
     onFilterChange({ ...filters, license: newLicenses });
   };
 
-  const handleSectionToggle = (sectionId: string) => {
-    const currentSections = filters.appliedSections || [];
-    const newSections = currentSections.includes(sectionId)
-      ? currentSections.filter(s => s !== sectionId)
-      : [...currentSections, sectionId];
-    
-    onFilterChange({ ...filters, appliedSections: newSections });
-  };
-
   const clearAllFilters = () => {
     onFilterChange({
       categories: [],
@@ -64,8 +49,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
       license: [],
       isNew: false,
       isTrending: false,
-      communityPick: false,
-      appliedSections: ['trending', 'community', 'discovery']
+      communityPick: false
     });
   };
 
@@ -125,32 +109,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
 
         {/* Filters Grid */}
         <div className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-8">
-            
-            {/* Apply to Sections */}
-            <div className="md:col-span-1 lg:col-span-3">
-              <div className="border border-orange-200 rounded-xl p-4 h-full bg-white">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                  <span className="text-lg mr-2">🎯</span>
-                  Apply To Sections
-                </h4>
-                <div className="space-y-2">
-                  {sections.map((section) => (
-                    <label key={section.id} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors duration-150">
-                      <input
-                        type="checkbox"
-                        checked={(filters.appliedSections || []).includes(section.id)}
-                        onChange={() => handleSectionToggle(section.id)}
-                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 mr-3 flex-shrink-0"
-                      />
-                      <span className="text-base mr-2">{section.icon}</span>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{section.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4 lg:gap-8">
             {/* Categories */}
             <div className="md:col-span-1 lg:col-span-3">
               <div className="border border-orange-200 rounded-xl p-4 bg-white">
