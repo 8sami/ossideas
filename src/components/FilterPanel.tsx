@@ -92,6 +92,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
           <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
             {hasActiveFilters && (
               <button
+                type="button"
                 onClick={clearAllFilters}
                 className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors duration-200"
               >
@@ -99,6 +100,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
             >
