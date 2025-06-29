@@ -124,11 +124,18 @@ const MainContent: React.FC<MainContentProps> = ({
     if (shouldFilterSection('trending')) {
       // Apply additional filters if needed
     }
-    // Sort by opportunity score (highest first) and take top 4
+    // Sort by teardown score from the original ideas data (highest first) and take top 4
     return filtered
-      .sort((a, b) => b.opportunityScore - a.opportunityScore)
+      .sort((a, b) => {
+        // Get the original idea data to access overall_teardown_score
+        const ideaA = ideas.find(idea => idea.id === a.id);
+        const ideaB = ideas.find(idea => idea.id === b.id);
+        const scoreA = ideaA?.overall_teardown_score || 0;
+        const scoreB = ideaB?.overall_teardown_score || 0;
+        return scoreB - scoreA;
+      })
       .slice(0, 4);
-  }, [convertedIdeas, shouldFilterSection]);
+  }, [convertedIdeas, ideas, shouldFilterSection]);
 
   const communityPicks = useMemo(() => {
     let filtered = convertedIdeas.filter((idea) => idea.communityPick);
@@ -167,7 +174,7 @@ const MainContent: React.FC<MainContentProps> = ({
     // Descriptive counts for sections
     switch (sectionId) {
       case 'trending':
-        return `${currentCount} trending ideas with high engagement`;
+        return `${currentCount} trending ideas with highest teardown scores`;
       case 'community':
         return `${currentCount} community favorites with strong adoption`;
       case 'discovery':
