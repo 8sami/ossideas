@@ -197,6 +197,19 @@ const MainContent: React.FC<MainContentProps> = ({
     return filtered;
   }, [searchQuery, filters]);
 
+  // Find the top 4 ideas with highest teardown scores to mark as trending
+  const topTrendingIdeasIds = useMemo(() => {
+    // Sort all ideas by teardown score and get top 4 IDs
+    return ideas
+      .sort((a, b) => {
+        const scoreA = a.overall_teardown_score || 0;
+        const scoreB = b.overall_teardown_score || 0;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4)
+      .map(idea => idea.id);
+  }, [ideas]);
+
   // Filter ideas for different sections based on "Apply to Sections" setting
   const trendingIdeas = useMemo(() => {
     // Get top 4 ideas with highest teardown scores for trending
@@ -389,7 +402,11 @@ const MainContent: React.FC<MainContentProps> = ({
                 {trendingIdeas.map((idea) => (
                   <IdeaCard
                     key={idea.id}
-                    idea={idea}
+                    idea={{
+                      ...idea,
+                      // Mark as trending if it's in the top 4 by teardown score
+                      isTrending: topTrendingIdeasIds.includes(idea.id)
+                    }}
                     onClick={() => handleIdeaSelect(idea)}
                     onRegisterClick={onRegisterClick}
                   />
@@ -414,7 +431,11 @@ const MainContent: React.FC<MainContentProps> = ({
                 {communityPicks.map((idea) => (
                   <IdeaCard
                     key={idea.id}
-                    idea={idea}
+                    idea={{
+                      ...idea,
+                      // Mark as trending if it's in the top 4 by teardown score
+                      isTrending: topTrendingIdeasIds.includes(idea.id)
+                    }}
                     onClick={() => handleIdeaSelect(idea)}
                     onRegisterClick={onRegisterClick}
                   />
@@ -444,7 +465,11 @@ const MainContent: React.FC<MainContentProps> = ({
                     return (
                       <div key={idea.id} ref={lastIdeaElementRef}>
                         <IdeaCard
-                          idea={idea}
+                          idea={{
+                            ...idea,
+                            // Mark as trending if it's in the top 4 by teardown score
+                            isTrending: topTrendingIdeasIds.includes(idea.id)
+                          }}
                           onClick={() => handleIdeaSelect(idea)}
                           onRegisterClick={onRegisterClick}
                         />
@@ -454,7 +479,11 @@ const MainContent: React.FC<MainContentProps> = ({
                     return (
                       <IdeaCard
                         key={idea.id}
-                        idea={idea}
+                        idea={{
+                          ...idea,
+                          // Mark as trending if it's in the top 4 by teardown score
+                          isTrending: topTrendingIdeasIds.includes(idea.id)
+                        }}
                         onClick={() => handleIdeaSelect(idea)}
                         onRegisterClick={onRegisterClick}
                       />
