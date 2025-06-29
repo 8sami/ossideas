@@ -6,7 +6,7 @@ export interface Idea {
   id: string;
   repository_id: string;
   title: string;
-  summary: string | null;
+  overview: any; // JSON field containing overview data
   overall_teardown_score: number | null;
   likes_count: number;
   is_premium: boolean;
@@ -424,6 +424,27 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
     }
   }
 
+  // Extract tagline from the idea's overview JSON field
+  let tagline = '';
+  if (idea.overview) {
+    try {
+      if (typeof idea.overview === 'object' && idea.overview.tagline) {
+        tagline = idea.overview.tagline;
+      } else if (typeof idea.overview === 'string') {
+        const overviewObj = JSON.parse(idea.overview);
+        tagline = overviewObj.tagline || '';
+      }
+    } catch (e) {
+      console.warn('Failed to parse idea overview:', e);
+      tagline = '';
+    }
+  }
+
+  // Fallback to repository description if no tagline found
+  if (!tagline) {
+    tagline = idea.repository?.description || 'No description available';
+  }
+
   // Determine if repository is new (created within last 30 days)
   const isNew = idea.repository?.created_at_github
     ? new Date(idea.repository.created_at_github) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -446,9 +467,9 @@ export const convertIdeaToIdeaData = (idea: Idea): IdeaData => {
   return {
     id: idea.id,
     title: idea.title,
-    tagline: idea.summary || idea.title,
+    tagline: tagline, // Now using the idea's tagline instead of repository description
     description:
-      idea.summary || 'No detailed description available for this idea.',
+      tagline || 'No detailed description available for this idea.',
     ossProject: idea.repository?.full_name || 'Unknown Repository',
     categories,
     industries,
