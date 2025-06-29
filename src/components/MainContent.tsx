@@ -212,21 +212,21 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
-    let baseIdeas = convertedIdeas.filter((idea) => idea.isTrending);
+    // Simply sort all ideas by overall_teardown_score (highest first)
+    const sortedIdeas = [...convertedIdeas].sort((a, b) => {
+      // Get the original idea data to access overall_teardown_score
+      const ideaA = ideas.find(idea => idea.id === a.id);
+      const ideaB = ideas.find(idea => idea.id === b.id);
+      const scoreA = ideaA?.overall_teardown_score || 0;
+      const scoreB = ideaB?.overall_teardown_score || 0;
+      return scoreB - scoreA;
+    });
     
     // Apply filters if this section is selected for filtering
-    const filtered = filterIdeasForSection(baseIdeas, 'trending');
+    const filtered = filterIdeasForSection(sortedIdeas, 'trending');
     
-    // Sort by teardown score from the original ideas data (highest first) and take top 4
-    return filtered
-      .sort((a, b) => {
-        const ideaA = ideas.find(idea => idea.id === a.id);
-        const ideaB = ideas.find(idea => idea.id === b.id);
-        const scoreA = ideaA?.overall_teardown_score || 0;
-        const scoreB = ideaB?.overall_teardown_score || 0;
-        return scoreB - scoreA;
-      })
-      .slice(0, 4);
+    // Take top 4
+    return filtered.slice(0, 4);
   }, [convertedIdeas, ideas, filterIdeasForSection]);
 
   const communityPicks = useMemo(() => {
@@ -268,7 +268,7 @@ const MainContent: React.FC<MainContentProps> = ({
     // Descriptive counts for sections
     switch (sectionId) {
       case 'trending':
-        return `${currentCount} trending ideas with highest teardown scores`;
+        return `${currentCount} ideas with highest teardown scores`;
       case 'community':
         return `${currentCount} community favorites with strong adoption`;
       case 'discovery':
@@ -392,7 +392,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     🔥 Trending Ideas
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('trending', trendingIdeas.length, convertedIdeas.filter(idea => idea.isTrending).length)}
+                    {getSectionDescription('trending', trendingIdeas.length, convertedIdeas.length)}
                   </p>
                 </div>
               </div>
