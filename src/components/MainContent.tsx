@@ -210,43 +210,35 @@ const MainContent: React.FC<MainContentProps> = ({
     [shouldApplyFiltersToSection, searchQuery, filters],
   );
 
-  // Trending ideas - top 4 by teardown score
+  // Filter ideas for different sections
   const trendingIdeas = useMemo(() => {
-    // Sort all ideas by overall_teardown_score (highest first)
-    const sortedIdeas = [...convertedIdeas].sort((a, b) => {
-      // Get the original idea data to access overall_teardown_score
-      const ideaA = ideas.find(idea => idea.id === a.id);
-      const ideaB = ideas.find(idea => idea.id === b.id);
-      const scoreA = ideaA?.overall_teardown_score || 0;
-      const scoreB = ideaB?.overall_teardown_score || 0;
-      return scoreB - scoreA;
-    });
+    let baseIdeas = convertedIdeas.filter((idea) => idea.isTrending);
     
-    // Take top 4 and mark them as trending
-    const topIdeas = sortedIdeas.slice(0, 4).map(idea => ({
-      ...idea,
-      isTrending: true // Explicitly mark as trending for badge display
-    }));
+    // Apply filters if this section is selected for filtering
+    const filtered = filterIdeasForSection(baseIdeas, 'trending');
     
-    // Apply filters if needed
-    return filterIdeasForSection(topIdeas, 'trending');
+    // Sort by teardown score from the original ideas data (highest first) and take top 4
+    return filtered
+      .sort((a, b) => {
+        const ideaA = ideas.find(idea => idea.id === a.id);
+        const ideaB = ideas.find(idea => idea.id === b.id);
+        const scoreA = ideaA?.overall_teardown_score || 0;
+        const scoreB = ideaB?.overall_teardown_score || 0;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4);
   }, [convertedIdeas, ideas, filterIdeasForSection]);
 
-  // Community picks - top 4 by repository stars
   const communityPicks = useMemo(() => {
-    // Sort all ideas by repository star count (highest first)
-    const sortedByStars = [...convertedIdeas].sort(
-      (a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0)
-    );
+    let baseIdeas = convertedIdeas.filter((idea) => idea.communityPick);
     
-    // Take top 4 and mark them as community picks
-    const topByStars = sortedByStars.slice(0, 4).map(idea => ({
-      ...idea,
-      communityPick: true // Explicitly mark as community pick for badge display
-    }));
+    // Apply filters if this section is selected for filtering
+    const filtered = filterIdeasForSection(baseIdeas, 'community');
     
-    // Apply filters if needed
-    return filterIdeasForSection(topByStars, 'community');
+    // Sort by repository stars (highest first) and take top 4
+    return filtered
+      .sort((a, b) => (b.repositoryStargazersCount || 0) - (a.repositoryStargazersCount || 0))
+      .slice(0, 4);
   }, [convertedIdeas, filterIdeasForSection]);
 
   // Discovery section - all ideas sorted by generated date (newest first)
@@ -276,9 +268,9 @@ const MainContent: React.FC<MainContentProps> = ({
     // Descriptive counts for sections
     switch (sectionId) {
       case 'trending':
-        return `${currentCount} ideas with highest teardown scores`;
+        return `${currentCount} trending ideas with highest teardown scores`;
       case 'community':
-        return `${currentCount} ideas with highest repository star counts`;
+        return `${currentCount} community favorites with strong adoption`;
       case 'discovery':
         return `Curated startup opportunities from open source projects`;
       default:
@@ -400,7 +392,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     🔥 Trending Ideas
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('trending', trendingIdeas.length, 4)}
+                    {getSectionDescription('trending', trendingIdeas.length, convertedIdeas.filter(idea => idea.isTrending).length)}
                   </p>
                 </div>
               </div>
@@ -425,7 +417,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     👥 Community Picks
                   </h2>
                   <p className="text-gray-600">
-                    {getSectionDescription('community', communityPicks.length, 4)}
+                    {getSectionDescription('community', communityPicks.length, convertedIdeas.filter(idea => idea.communityPick).length)}
                   </p>
                 </div>
               </div>
