@@ -2,23 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar */
+/* For WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 6px; /* makes the scrollbar thin */
+  height: 6px; /* for horizontal scrollbars */
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f1f1f1; /* light grey track */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #ea580c; /* orange-600 color */
+  border-radius: 4px; /* rounded corners */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #c2410c; /* orange-700 for hover state */
 }
+
+/* For Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #ea580c #f1f1f1;
+}
+
 
 /* Line clamp utilities */
 .line-clamp-2 {
