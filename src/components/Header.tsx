@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, User, LogIn, Crown } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  User,
+  LogIn,
+  Crown,
+} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User as UserType } from '../types/auth';
 import { supabase } from '../lib/supabase';
@@ -130,11 +136,6 @@ const Header: React.FC<HeaderProps> = ({
     setProfileDropdownOpen(false);
   };
 
-  const handleSettingsClick = () => {
-    navigate('/settings');
-    setProfileDropdownOpen(false);
-  };
-
   const handleHelpSupportClick = () => {
     navigate('/help-support');
     setProfileDropdownOpen(false);
@@ -232,11 +233,6 @@ const Header: React.FC<HeaderProps> = ({
                         onClick={handleSubmissionsClick}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         My Submissions
-                      </button>
-                      <button
-                        onClick={handleSettingsClick}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Settings
                       </button>
                       <button
                         onClick={handleHelpSupportClick}

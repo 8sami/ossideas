@@ -14,7 +14,6 @@ import UserProfile from './components/UserProfile';
 import SavedIdeas from './components/SavedIdeas';
 import MySubmissions from './components/MySubmissions';
 import EditSubmissionForm from './components/EditSubmissionForm';
-import Settings from './components/Settings';
 import HelpSupport from './components/HelpSupport';
 import PricingPage from './components/PricingPage';
 import SuccessPage from './components/SuccessPage';
@@ -131,7 +130,6 @@ const AppContent: React.FC = () => {
             <Route path="/saved-ideas" element={<SavedIdeas />} />
             <Route path="/submissions" element={<MySubmissions />} />
             <Route path="/submissions/:id" element={<EditSubmissionForm />} />
-            <Route path="/settings" element={<Settings />} />
             <Route path="/help-support" element={<HelpSupport />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -6,11 +6,9 @@ import {
   Heart,
   Users,
   Plus,
-  Settings,
   Menu,
   X,
   CreditCard,
-  Shield,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -67,20 +65,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
       path: '/submit',
       onClick: () => navigate('/submit'),
       premium: true,
-    },
-    {
-      id: 'settings',
-      icon: Settings,
-      label: 'Settings',
-      path: '/settings',
-      onClick: () => navigate('/settings'),
-    },
-    {
-      id: 'privacy',
-      icon: Shield,
-      label: 'Privacy Policy',
-      path: '/privacy',
-      onClick: () => navigate('/privacy'),
     },
   ];
 
