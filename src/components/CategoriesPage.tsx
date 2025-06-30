@@ -57,19 +57,8 @@ const CategoriesPage: React.FC = () => {
   };
 
   const handleCategoryClick = (category: string) => {
-    // Update filters and navigate to ideas page
-    setFilters({
-      categories: [category],
-      industries: [],
-      opportunityScore: [0, 100],
-      license: [],
-      isNew: false,
-      isTrending: false,
-      communityPick: false
-    });
-    
-    // Navigate to ideas page
-    navigate('/ideas');
+    // Update filters and navigate to ideas page with query parameter
+    navigate(`/ideas?category=${encodeURIComponent(category)}`);
   };
 
   const getCategoryIcon = (categoryName: string) => {
