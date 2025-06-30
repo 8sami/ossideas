@@ -190,32 +190,6 @@ const IdeaDetail: React.FC = () => {
     setActiveTab(tabs[0]?.id || null);
   }
 
-  // Get current tab content
-  const getTabContent = (tabId: string | null) => {
-    if (!tabId) return null;
-    
-    switch (tabId) {
-      case 'monetization':
-        return monetizationAnalysis && <MonetizationStrategyCard analysis={monetizationAnalysis} />;
-      case 'mvp':
-        return mvpFeaturesAnalysis && <MVPFeaturesCard analysis={mvpFeaturesAnalysis} />;
-      case 'competitive':
-        return competitiveAnalysis && <CompetitiveAnalysisCard analysis={competitiveAnalysis} />;
-      case 'tech':
-        return techStackAnalysis && <TechStackCard analysis={techStackAnalysis} />;
-      case 'metrics':
-        return metricsAnalysis && <MetricsCard analysis={metricsAnalysis} />;
-      case 'risks':
-        return riskAnalysis && <RiskAnalysisCard analysis={riskAnalysis} />;
-      case 'actions':
-        return actionItemsAnalysis && <ActionItemsCard analysis={actionItemsAnalysis} />;
-      case 'gtm':
-        return goToMarketAnalysis && <GoToMarketCard analysis={goToMarketAnalysis} />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -373,7 +347,156 @@ const IdeaDetail: React.FC = () => {
 
               {/* Tab Content */}
               <div className="p-6">
-                {getTabContent(activeTab)}
+                {activeTab === 'monetization' && monetizationAnalysis && (
+                  <div className="monetization-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <DollarSign className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Monetization Strategy</h3>
+                        <p className="text-sm text-gray-600">
+                          {typeof monetizationAnalysis.analysis_payload === 'object' && 'pricingModel' in monetizationAnalysis.analysis_payload && 'valueMetric' in monetizationAnalysis.analysis_payload
+                            ? `${monetizationAnalysis.analysis_payload.pricingModel} model based on ${monetizationAnalysis.analysis_payload.valueMetric}`
+                            : 'Pricing strategy and revenue streams'}
+                        </p>
+                      </div>
+                    </div>
+                    <MonetizationStrategyCard analysis={monetizationAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'mvp' && mvpFeaturesAnalysis && (
+                  <div className="mvp-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Zap className="h-6 w-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">MVP Core Features</h3>
+                        <p className="text-sm text-gray-600">
+                          Minimum viable product features to validate the idea
+                        </p>
+                      </div>
+                    </div>
+                    <MVPFeaturesCard analysis={mvpFeaturesAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'competitive' && competitiveAnalysis && (
+                  <div className="competitive-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-teal-100 rounded-lg">
+                        <Target className="h-6 w-6 text-teal-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Competitive Analysis</h3>
+                        <p className="text-sm text-gray-600">
+                          {typeof competitiveAnalysis.analysis_payload === 'object' && 
+                           'directCompetitors' in competitiveAnalysis.analysis_payload && 
+                           'indirectCompetitors' in competitiveAnalysis.analysis_payload
+                            ? `${(competitiveAnalysis.analysis_payload.directCompetitors as any[]).length} direct competitors, ${(competitiveAnalysis.analysis_payload.indirectCompetitors as any[]).length} indirect alternatives`
+                            : 'Market competition and positioning'}
+                        </p>
+                      </div>
+                    </div>
+                    <CompetitiveAnalysisCard analysis={competitiveAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'tech' && techStackAnalysis && (
+                  <div className="tech-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Code className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Technical Stack & Workflow</h3>
+                        <p className="text-sm text-gray-600">
+                          {typeof techStackAnalysis.analysis_payload === 'object' && 
+                           'implementationComplexity' in techStackAnalysis.analysis_payload && 
+                           'coreComponents' in techStackAnalysis.analysis_payload && 
+                           'workflow' in techStackAnalysis.analysis_payload
+                            ? `${(techStackAnalysis.analysis_payload.implementationComplexity as string).charAt(0).toUpperCase() + (techStackAnalysis.analysis_payload.implementationComplexity as string).slice(1)} Complexity • ${(techStackAnalysis.analysis_payload.coreComponents as any[]).length} components • ${(techStackAnalysis.analysis_payload.workflow as any).steps.length} implementation steps`
+                            : 'Technical implementation details and architecture'}
+                        </p>
+                      </div>
+                    </div>
+                    <TechStackCard analysis={techStackAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'metrics' && metricsAnalysis && (
+                  <div className="metrics-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Success Metrics & KPIs</h3>
+                        <p className="text-sm text-gray-600">
+                          Key metrics to track across the customer journey
+                        </p>
+                      </div>
+                    </div>
+                    <MetricsCard analysis={metricsAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'risks' && riskAnalysis && (
+                  <div className="risks-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        <AlertTriangle className="h-6 w-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Risks & Mitigations</h3>
+                        <p className="text-sm text-gray-600">
+                          {typeof riskAnalysis.analysis_payload === 'object' && 
+                           'risks' in riskAnalysis.analysis_payload && 
+                           'criticalRisks' in riskAnalysis.analysis_payload
+                            ? `${(riskAnalysis.analysis_payload.risks as any[]).length} identified risks, ${(riskAnalysis.analysis_payload.criticalRisks as any[]).length} critical`
+                            : 'Potential challenges and mitigation strategies'}
+                        </p>
+                      </div>
+                    </div>
+                    <RiskAnalysisCard analysis={riskAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'actions' && actionItemsAnalysis && (
+                  <div className="actions-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-indigo-100 rounded-lg">
+                        <ListChecks className="h-6 w-6 text-indigo-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Next Steps & Action Items</h3>
+                        <p className="text-sm text-gray-600">
+                          Practical steps to move from concept to implementation
+                        </p>
+                      </div>
+                    </div>
+                    <ActionItemsCard analysis={actionItemsAnalysis} />
+                  </div>
+                )}
+
+                {activeTab === 'gtm' && goToMarketAnalysis && (
+                  <div className="gtm-content">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Rocket className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Go-to-Market Plan</h3>
+                        <p className="text-sm text-gray-600">
+                          Launch strategy and marketing plan
+                        </p>
+                      </div>
+                    </div>
+                    <GoToMarketCard analysis={goToMarketAnalysis} />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
