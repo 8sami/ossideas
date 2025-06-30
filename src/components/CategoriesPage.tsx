@@ -13,12 +13,10 @@ import {
   X
 } from 'lucide-react';
 import { useCategorizedIdeasSummary } from '../hooks/useCategorizedIdeasSummary';
-import { useFilterOptions } from '../hooks/useFilterOptions';
 
 const CategoriesPage: React.FC = () => {
   const navigate = useNavigate();
   const { categories, loading, error } = useCategorizedIdeasSummary();
-  const { setFilters } = useFilterOptions();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'ideas' | 'name' | 'growth'>('ideas');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -57,7 +55,7 @@ const CategoriesPage: React.FC = () => {
   };
 
   const handleCategoryClick = (category: string) => {
-    // Update filters and navigate to ideas page with query parameter
+    // Navigate to ideas page with category filter
     navigate(`/ideas?category=${encodeURIComponent(category)}`);
   };
 

@@ -73,19 +73,6 @@ const MainContent: React.FC<MainContentProps> = ({
     [],
   );
 
-  // Parse URL query parameters on mount and when location changes
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    
-    // Extract category from URL if present
-    const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      const newFilters = { ...filters };
-      newFilters.categories = [decodeURIComponent(categoryParam)];
-      setFilters(newFilters);
-    }
-  }, [location.search]);
-
   // Apply filters when they change - use a ref to prevent infinite loops
   const lastAppliedFiltersRef = useRef<string>('');
 
@@ -281,7 +268,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     className="inline-flex items-center space-x-2 px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium">
                     <span>Submit Repository</span>
                     <svg
-                      className="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor">
