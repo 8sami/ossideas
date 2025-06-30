@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, AlertCircle, ShieldAlert, Lightbulb } from 'lucide-react';
+import { AlertTriangle, AlertCircle, ShieldAlert, Lightbulb } from 'lucide-react';
 import { AnalysisResult, RiskAnalysisData } from './AnalysisResults';
 
 interface RiskAnalysisCardProps {
@@ -7,7 +7,6 @@ interface RiskAnalysisCardProps {
 }
 
 const RiskAnalysisCard: React.FC<RiskAnalysisCardProps> = ({ analysis }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState<'risks' | 'critical' | 'contingency'>('risks');
 
   // Parse the analysis payload if it's a string
@@ -86,206 +85,105 @@ const RiskAnalysisCard: React.FC<RiskAnalysisCardProps> = ({ analysis }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Card Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Risks & Mitigations</h3>
-              <p className="text-sm text-gray-600">
-                {data.risks.length} identified risks, {data.criticalRisks.length} critical
-              </p>
-            </div>
+    <div className="bg-white overflow-hidden">
+      <div className="mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-red-100 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </button>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Risks & Mitigations</h3>
+            <p className="text-sm text-gray-600">
+              {data.risks.length} identified risks, {data.criticalRisks.length} critical
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Card Content */}
-      {isExpanded && (
-        <div className="p-6">
-          {/* Tabs */}
-          <div className="flex border-b border-gray-200 mb-6">
-            <button
-              onClick={() => setActiveTab('risks')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 ${
-                activeTab === 'risks'
-                  ? 'border-red-500 text-red-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span>All Risks ({data.risks.length})</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('critical')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 ${
-                activeTab === 'critical'
-                  ? 'border-red-500 text-red-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-4 w-4" />
-                <span>Critical Risks ({data.criticalRisks.length})</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('contingency')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 ${
-                activeTab === 'contingency'
-                  ? 'border-red-500 text-red-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <ShieldAlert className="h-4 w-4" />
-                <span>Contingency Plans ({data.contingencyPlans.length})</span>
-              </div>
-            </button>
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setActiveTab('risks')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${
+            activeTab === 'risks'
+              ? 'border-red-500 text-red-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>All Risks ({data.risks.length})</span>
           </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('critical')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${
+            activeTab === 'critical'
+              ? 'border-red-500 text-red-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="h-4 w-4" />
+            <span>Critical Risks ({data.criticalRisks.length})</span>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('contingency')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${
+            activeTab === 'contingency'
+              ? 'border-red-500 text-red-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            <ShieldAlert className="h-4 w-4" />
+            <span>Contingency Plans ({data.contingencyPlans.length})</span>
+          </div>
+        </button>
+      </div>
 
-          {/* All Risks Tab */}
-          {activeTab === 'risks' && (
-            <div className="space-y-6">
-              {data.risks.map((risk, index) => {
-                const severity = getRiskSeverity(risk.impact, risk.probability);
-                
-                return (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="flex items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <h4 className="font-semibold text-gray-900">{risk.description}</h4>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(severity)}`}>
-                            {severity}
-                          </span>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getImpactColor(risk.impact)}`}>
-                            Impact: {risk.impact}
-                          </span>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getProbabilityColor(risk.probability)}`}>
-                            Probability: {risk.probability}
-                          </span>
-                        </div>
-                        
-                        <div className="mt-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Lightbulb className="h-4 w-4 text-blue-600" />
-                            <h5 className="text-sm font-medium text-gray-900">Mitigation Strategy</h5>
-                          </div>
-                          <p className="text-sm text-gray-700 pl-6">{risk.mitigation}</p>
-                        </div>
+      {/* All Risks Tab */}
+      {activeTab === 'risks' && (
+        <div className="space-y-6">
+          {data.risks.map((risk, index) => {
+            const severity = getRiskSeverity(risk.impact, risk.probability);
+            
+            return (
+              <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <h4 className="font-semibold text-gray-900">{risk.description}</h4>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(severity)}`}>
+                        {severity}
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getImpactColor(risk.impact)}`}>
+                        Impact: {risk.impact}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getProbabilityColor(risk.probability)}`}>
+                        Probability: {risk.probability}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Lightbulb className="h-4 w-4 text-blue-600" />
+                        <h5 className="text-sm font-medium text-gray-900">Mitigation Strategy</h5>
                       </div>
+                      <p className="text-sm text-gray-700 pl-6">{risk.mitigation}</p>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Critical Risks Tab */}
-          {activeTab === 'critical' && (
-            <div className="space-y-4">
-              {data.criticalRisks.length > 0 ? (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                  <div className="flex items-start space-x-3">
-                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-sm font-medium text-red-800 mb-1">Critical Risks Requiring Immediate Attention</h3>
-                      <p className="text-sm text-red-700">
-                        These risks have both high impact and high probability and should be addressed as a priority.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                  <div className="flex items-start space-x-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-sm font-medium text-yellow-800 mb-1">No Critical Risks Identified</h3>
-                      <p className="text-sm text-yellow-700">
-                        While there are risks to consider, none are currently classified as critical (high impact + high probability).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <ul className="space-y-3">
-                {data.criticalRisks.map((risk, index) => (
-                  <li key={index} className="bg-white border border-red-200 rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                      <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-gray-800">{risk}</p>
-                        
-                        {/* Find the corresponding full risk to show mitigation */}
-                        {data.risks.find(r => r.description.includes(risk.substring(0, 20)))?.mitigation && (
-                          <div className="mt-2 pt-2 border-t border-gray-100">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <Lightbulb className="h-4 w-4 text-blue-600" />
-                              <h5 className="text-xs font-medium text-gray-700">Recommended Mitigation</h5>
-                            </div>
-                            <p className="text-xs text-gray-600 pl-6">
-                              {data.risks.find(r => r.description.includes(risk.substring(0, 20)))?.mitigation}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Contingency Plans Tab */}
-          {activeTab === 'contingency' && (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <div className="flex items-start space-x-3">
-                  <ShieldAlert className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-sm font-medium text-blue-800 mb-1">Contingency Planning</h3>
-                    <p className="text-sm text-blue-700">
-                      These plans outline what to do if key risks materialize, including pivot options and exit strategies.
-                    </p>
                   </div>
                 </div>
               </div>
-
-              <ul className="space-y-4">
-                {data.contingencyPlans.map((plan, index) => (
-                  <li key={index} className="bg-white border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="bg-blue-100 rounded-full p-1 mt-0.5 flex-shrink-0">
-                        <span className="font-bold text-blue-700 text-sm">{index + 1}</span>
-                      </div>
-                      <p className="text-gray-800">{plan}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            );
+          })}
 
           {/* Risk Matrix */}
-          {activeTab === 'risks' && data.risks.length > 0 && (
+          {data.risks.length > 0 && (
             <div className="mt-8 pt-6 border-t border-gray-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-4">Risk Matrix</h4>
               <div className="relative overflow-hidden">
@@ -367,6 +265,93 @@ const RiskAnalysisCard: React.FC<RiskAnalysisCardProps> = ({ analysis }) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Critical Risks Tab */}
+      {activeTab === 'critical' && (
+        <div className="space-y-4">
+          {data.criticalRisks.length > 0 ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-medium text-red-800 mb-1">Critical Risks Requiring Immediate Attention</h3>
+                  <p className="text-sm text-red-700">
+                    These risks have both high impact and high probability and should be addressed as a priority.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 mb-1">No Critical Risks Identified</h3>
+                  <p className="text-sm text-yellow-700">
+                    While there are risks to consider, none are currently classified as critical (high impact + high probability).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <ul className="space-y-3">
+            {data.criticalRisks.map((risk, index) => (
+              <li key={index} className="bg-white border border-red-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-gray-800">{risk}</p>
+                    
+                    {/* Find the corresponding full risk to show mitigation */}
+                    {data.risks.find(r => r.description.includes(risk.substring(0, 20)))?.mitigation && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Lightbulb className="h-4 w-4 text-blue-600" />
+                          <h5 className="text-xs font-medium text-gray-700">Recommended Mitigation</h5>
+                        </div>
+                        <p className="text-xs text-gray-600 pl-6">
+                          {data.risks.find(r => r.description.includes(risk.substring(0, 20)))?.mitigation}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Contingency Plans Tab */}
+      {activeTab === 'contingency' && (
+        <div className="space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start space-x-3">
+              <ShieldAlert className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-medium text-blue-800 mb-1">Contingency Planning</h3>
+                <p className="text-sm text-blue-700">
+                  These plans outline what to do if key risks materialize, including pivot options and exit strategies.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <ul className="space-y-4">
+            {data.contingencyPlans.map((plan, index) => (
+              <li key={index} className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-blue-100 rounded-full p-1 mt-0.5 flex-shrink-0">
+                    <span className="font-bold text-blue-700 text-sm">{index + 1}</span>
+                  </div>
+                  <p className="text-gray-800">{plan}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
