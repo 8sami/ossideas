@@ -60,26 +60,25 @@ export interface IdeaFilters {
 
 const ITEMS_PER_PAGE = 12;
 
-export const useIdeas = () => {
+export const useIdeas = (currentFilters: IdeaFilters = {
+  min_score: 0,
+  max_score: 100,
+  is_premium: null,
+  status: [],
+  search_query: '',
+  idea_categories: [],
+  idea_industries: [],
+  license_names: [],
+}) => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true); // Start with true for initial load
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [initialized, setInitialized] = useState(false);
-  const [filters, setFilters] = useState<IdeaFilters>({
-    min_score: 0,
-    max_score: 100,
-    is_premium: null,
-    status: [],
-    search_query: '',
-    idea_categories: [],
-    idea_industries: [],
-    license_names: [],
-  });
 
   const buildQuery = useCallback(
-    (page: number, currentFilters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
+    (page: number, filters: IdeaFilters, filteredIdeaIds: string[] | null = null) => {
       let query = supabase
         .from('ideas')
         .select(
@@ -124,34 +123,34 @@ export const useIdeas = () => {
       }
 
       // Apply score filters
-      if (currentFilters.min_score > 0) {
-        query = query.gte('overall_teardown_score', currentFilters.min_score);
+      if (filters.min_score > 0) {
+        query = query.gte('overall_teardown_score', filters.min_score);
       }
 
-      if (currentFilters.max_score < 100) {
-        query = query.lte('overall_teardown_score', currentFilters.max_score);
+      if (filters.max_score < 100) {
+        query = query.lte('overall_teardown_score', filters.max_score);
       }
 
       // Apply premium filter
-      if (currentFilters.is_premium !== null) {
-        query = query.eq('is_premium', currentFilters.is_premium);
+      if (filters.is_premium !== null) {
+        query = query.eq('is_premium', filters.is_premium);
       }
 
       // Apply status filter
-      if (currentFilters.status.length > 0) {
-        query = query.in('status', currentFilters.status);
+      if (filters.status.length > 0) {
+        query = query.in('status', filters.status);
       }
 
       // Apply search query
-      if (currentFilters.search_query) {
+      if (filters.search_query) {
         query = query.or(
-          `title.ilike.%${currentFilters.search_query}%,repository.description.ilike.%${currentFilters.search_query}%`,
+          `title.ilike.%${filters.search_query}%,repository.description.ilike.%${filters.search_query}%`,
         );
       }
 
       // Apply license filter directly (no need for subquery)
-      if (currentFilters.license_names.length > 0) {
-        query = query.in('repository.license_name', currentFilters.license_names);
+      if (filters.license_names.length > 0) {
+        query = query.in('repository.license_name', filters.license_names);
       }
 
       // Apply pagination
@@ -173,14 +172,14 @@ export const useIdeas = () => {
         let filteredIdeaIds: string[] | null = null;
 
         // If we have category or industry filters, we need to pre-fetch the idea IDs
-        if (filters.idea_categories.length > 0 || filters.idea_industries.length > 0) {
+        if (currentFilters.idea_categories.length > 0 || currentFilters.idea_industries.length > 0) {
           // Get idea IDs that match category filters
           let categoryIdeaIds: string[] | null = null;
-          if (filters.idea_categories.length > 0) {
+          if (currentFilters.idea_categories.length > 0) {
             const { data: categoryData, error: categoryError } = await supabase
               .from('auto_idea_category')
               .select('idea_id')
-              .in('category_name', filters.idea_categories);
+              .in('category_name', currentFilters.idea_categories);
 
             if (categoryError) {
               console.error('Error fetching category idea IDs:', categoryError);
@@ -203,11 +202,11 @@ export const useIdeas = () => {
 
           // Get idea IDs that match industry filters
           let industryIdeaIds: string[] | null = null;
-          if (filters.idea_industries.length > 0) {
+          if (currentFilters.idea_industries.length > 0) {
             const { data: industryData, error: industryError } = await supabase
               .from('auto_idea_industry')
               .select('idea_id')
-              .in('industry_name', filters.idea_industries);
+              .in('industry_name', currentFilters.idea_industries);
 
             if (industryError) {
               console.error('Error fetching industry idea IDs:', industryError);
@@ -249,7 +248,7 @@ export const useIdeas = () => {
         }
 
         // Now fetch the ideas with all filters applied
-        const { data, error: fetchError } = await buildQuery(page, filters, filteredIdeaIds);
+        const { data, error: fetchError } = await buildQuery(page, currentFilters, filteredIdeaIds);
 
         if (fetchError) {
           throw fetchError;
@@ -275,7 +274,7 @@ export const useIdeas = () => {
         }
       }
     },
-    [buildQuery, filters, loading, initialized],
+    [buildQuery, currentFilters, loading, initialized],
   );
 
   const loadMore = useCallback(() => {
@@ -284,45 +283,22 @@ export const useIdeas = () => {
     }
   }, [fetchIdeas, currentPage, loading, hasMore, initialized]);
 
-  const applyFilters = useCallback((newFilters: IdeaFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(0);
-    setIdeas([]);
-    setHasMore(true);
-    setInitialized(false); // Reset initialization for new filter
-  }, []);
-
-  const resetFilters = useCallback(() => {
-    const defaultFilters: IdeaFilters = {
-      min_score: 0,
-      max_score: 100,
-      is_premium: null,
-      status: [],
-      search_query: '',
-      idea_categories: [],
-      idea_industries: [],
-      license_names: [],
-    };
-    applyFilters(defaultFilters);
-  }, [applyFilters]);
-
-  // Initial fetch - only run once on mount
+  // Reset and fetch when filters change
   useEffect(() => {
-    if (!initialized) {
-      fetchIdeas(0, true);
-    }
-  }, [filters, initialized, fetchIdeas]);
+    setIdeas([]);
+    setCurrentPage(0);
+    setHasMore(true);
+    setInitialized(false);
+    fetchIdeas(0, true);
+  }, [currentFilters, fetchIdeas]);
 
   return {
     ideas,
     loading,
     hasMore,
     error,
-    filters,
     initialized,
     loadMore,
-    applyFilters,
-    resetFilters,
     refetch: () => fetchIdeas(0, true),
   };
 };
