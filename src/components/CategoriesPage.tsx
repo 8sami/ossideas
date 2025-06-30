@@ -9,7 +9,8 @@ import {
   Zap, 
   Filter, 
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X
 } from 'lucide-react';
 import { useCategorizedIdeasSummary } from '../hooks/useCategorizedIdeasSummary';
 
@@ -158,10 +159,18 @@ const CategoriesPage: React.FC = () => {
                 placeholder="Search categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="px-4 py-2 bg-white border border-gray-300 rounded-lg flex items-center space-x-2 hover:bg-gray-50 transition-colors">
@@ -173,63 +182,57 @@ const CategoriesPage: React.FC = () => {
                   <ChevronDown className="h-4 w-4 text-gray-600" />
                 )}
               </button>
-              <div className="relative">
-                <button
-                  onClick={() => handleSortChange('ideas')}
-                  className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                    sortBy === 'ideas'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}>
-                  <BarChart2 className="h-4 w-4" />
-                  <span>Ideas</span>
-                  {sortBy === 'ideas' && (
-                    sortDirection === 'desc' ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )
-                  )}
-                </button>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => handleSortChange('name')}
-                  className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                    sortBy === 'name'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}>
-                  <Grid3X3 className="h-4 w-4" />
-                  <span>Name</span>
-                  {sortBy === 'name' && (
-                    sortDirection === 'desc' ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )
-                  )}
-                </button>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => handleSortChange('growth')}
-                  className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                    sortBy === 'growth'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}>
-                  <TrendingUp className="h-4 w-4" />
-                  <span>Growth</span>
-                  {sortBy === 'growth' && (
-                    sortDirection === 'desc' ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={() => handleSortChange('ideas')}
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                  sortBy === 'ideas'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}>
+                <BarChart2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Ideas</span>
+                {sortBy === 'ideas' && (
+                  sortDirection === 'desc' ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )
+                )}
+              </button>
+              <button
+                onClick={() => handleSortChange('name')}
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                  sortBy === 'name'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}>
+                <Grid3X3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Name</span>
+                {sortBy === 'name' && (
+                  sortDirection === 'desc' ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )
+                )}
+              </button>
+              <button
+                onClick={() => handleSortChange('growth')}
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                  sortBy === 'growth'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}>
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Growth</span>
+                {sortBy === 'growth' && (
+                  sortDirection === 'desc' ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )
+                )}
+              </button>
             </div>
           </div>
 
@@ -292,7 +295,7 @@ const CategoriesPage: React.FC = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedCategories.length > 0 ? (
             sortedCategories.map((category) => (
               <div
@@ -363,7 +366,7 @@ const CategoriesPage: React.FC = () => {
         {/* Stats Section */}
         <div className="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Category Insights</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-medium text-gray-700">Total Categories</h3>

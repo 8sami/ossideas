@@ -5,7 +5,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import IdeaCard from './IdeaCard';
 import FilterPanel from './FilterPanel';
 import { IdeaData, FilterOptions } from '../types';
@@ -17,6 +17,7 @@ import {
 import { useSubmissions } from '../hooks/useSubmissions';
 import { Zap } from 'lucide-react';
 import FullScreenLoader from './FullScreenLoader';
+import { useFilterOptions } from '../hooks/useFilterOptions';
 
 interface MainContentProps {
   filterOpen: boolean;
@@ -30,16 +31,9 @@ const MainContent: React.FC<MainContentProps> = ({
   onRegisterClick,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterOptions>({
-    categories: [],
-    industries: [],
-    opportunityScore: [0, 100],
-    license: [],
-    isNew: false,
-    isTrending: false,
-    communityPick: false,
-  });
+  const { filters, setFilters } = useFilterOptions();
 
   // Use the ideas hook for all data
   const {
