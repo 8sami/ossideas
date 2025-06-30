@@ -4,7 +4,7 @@
 
 /* For WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 4px; /* makes the scrollbar thin */
+  width: 4px; 
   height: 4px; /* for horizontal scrollbars */
 }
 
