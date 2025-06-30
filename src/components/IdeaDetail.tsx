@@ -44,7 +44,6 @@ const IdeaDetail: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   const isSaved = idea ? isIdeaSaved(idea.id) : false;
 
@@ -124,97 +123,6 @@ const IdeaDetail: React.FC = () => {
   const monetizationAnalysis = findAnalysisByType(6);
   const actionItemsAnalysis = findAnalysisByType(4);
   const goToMarketAnalysis = findAnalysisByType(10);
-
-  // Define tabs based on available analysis results
-  const tabs = [
-    monetizationAnalysis && { 
-      id: 'monetization', 
-      label: 'Monetization Strategy', 
-      icon: DollarSign, 
-      color: 'text-orange-600',
-      analysis: monetizationAnalysis 
-    },
-    mvpFeaturesAnalysis && { 
-      id: 'mvp', 
-      label: 'MVP Features', 
-      icon: Zap, 
-      color: 'text-yellow-600',
-      analysis: mvpFeaturesAnalysis 
-    },
-    competitiveAnalysis && { 
-      id: 'competitive', 
-      label: 'Competitive Analysis', 
-      icon: Target, 
-      color: 'text-teal-600',
-      analysis: competitiveAnalysis 
-    },
-    techStackAnalysis && { 
-      id: 'tech', 
-      label: 'Tech Stack', 
-      icon: Code, 
-      color: 'text-blue-600',
-      analysis: techStackAnalysis 
-    },
-    metricsAnalysis && { 
-      id: 'metrics', 
-      label: 'Success Metrics', 
-      icon: TrendingUp, 
-      color: 'text-green-600',
-      analysis: metricsAnalysis 
-    },
-    riskAnalysis && { 
-      id: 'risks', 
-      label: 'Risks & Mitigations', 
-      icon: AlertTriangle, 
-      color: 'text-red-600',
-      analysis: riskAnalysis 
-    },
-    actionItemsAnalysis && { 
-      id: 'actions', 
-      label: 'Next Steps', 
-      icon: ListChecks, 
-      color: 'text-indigo-600',
-      analysis: actionItemsAnalysis 
-    },
-    goToMarketAnalysis && { 
-      id: 'gtm', 
-      label: 'Go-to-Market', 
-      icon: Rocket, 
-      color: 'text-purple-600',
-      analysis: goToMarketAnalysis 
-    },
-  ].filter(Boolean);
-
-  // Set default active tab if not set
-  if (!activeTab && tabs.length > 0) {
-    setActiveTab(tabs[0]?.id || null);
-  }
-
-  // Get current tab content
-  const getTabContent = (tabId: string | null) => {
-    if (!tabId) return null;
-    
-    switch (tabId) {
-      case 'monetization':
-        return monetizationAnalysis && <MonetizationStrategyCard analysis={monetizationAnalysis} />;
-      case 'mvp':
-        return mvpFeaturesAnalysis && <MVPFeaturesCard analysis={mvpFeaturesAnalysis} />;
-      case 'competitive':
-        return competitiveAnalysis && <CompetitiveAnalysisCard analysis={competitiveAnalysis} />;
-      case 'tech':
-        return techStackAnalysis && <TechStackCard analysis={techStackAnalysis} />;
-      case 'metrics':
-        return metricsAnalysis && <MetricsCard analysis={metricsAnalysis} />;
-      case 'risks':
-        return riskAnalysis && <RiskAnalysisCard analysis={riskAnalysis} />;
-      case 'actions':
-        return actionItemsAnalysis && <ActionItemsCard analysis={actionItemsAnalysis} />;
-      case 'gtm':
-        return goToMarketAnalysis && <GoToMarketCard analysis={goToMarketAnalysis} />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -349,46 +257,63 @@ const IdeaDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* Analysis Results */}
         <div className="space-y-8">
-          {/* Tabs Navigation */}
-          {tabs.length > 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="border-b border-gray-200 overflow-x-auto">
-                <div className="flex min-w-max">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-6 py-4 flex items-center space-x-2 font-medium text-sm transition-colors ${
-                        activeTab === tab.id
-                          ? `border-b-2 border-${tab.color.split('-')[1]}-500 ${tab.color}`
-                          : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? tab.color : 'text-gray-400'}`} />
-                      <span>{tab.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+          {/* Analysis Cards */}
+          <div className="grid grid-cols-1 gap-8">
+            {/* Monetization Strategy Card */}
+            {monetizationAnalysis && (
+              <MonetizationStrategyCard analysis={monetizationAnalysis} />
+            )}
 
-              {/* Tab Content */}
-              <div className="p-6">
-                {getTabContent(activeTab)}
+            {/* MVP Features Card */}
+            {mvpFeaturesAnalysis && (
+              <MVPFeaturesCard analysis={mvpFeaturesAnalysis} />
+            )}
+
+            {/* Competitive Analysis Card */}
+            {competitiveAnalysis && (
+              <CompetitiveAnalysisCard analysis={competitiveAnalysis} />
+            )}
+
+            {/* Tech Stack Card */}
+            {techStackAnalysis && (
+              <TechStackCard analysis={techStackAnalysis} />
+            )}
+
+            {/* Metrics Card */}
+            {metricsAnalysis && (
+              <MetricsCard analysis={metricsAnalysis} />
+            )}
+
+            {/* Risk Analysis Card */}
+            {riskAnalysis && (
+              <RiskAnalysisCard analysis={riskAnalysis} />
+            )}
+
+            {/* Action Items Card */}
+            {actionItemsAnalysis && (
+              <ActionItemsCard analysis={actionItemsAnalysis} />
+            )}
+
+            {/* Go-to-Market Card */}
+            {goToMarketAnalysis && (
+              <GoToMarketCard analysis={goToMarketAnalysis} />
+            )}
+
+            {/* No Analysis Results */}
+            {!idea.analysisResults || idea.analysisResults.length === 0 && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Layers className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Analysis Results Available
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  This idea doesn't have any detailed analysis results yet.
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Layers className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No Analysis Results Available
-              </h3>
-              <p className="text-gray-600 mb-6">
-                This idea doesn't have any detailed analysis results yet.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
