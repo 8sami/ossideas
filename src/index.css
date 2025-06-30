@@ -5,7 +5,7 @@
 /* For WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width: 6px; /* makes the scrollbar thin */
-  height: 6px; /* for horizontal scrollbars */
+  height: 4px; /* for horizontal scrollbars */
 }
 
 ::-webkit-scrollbar-track {
