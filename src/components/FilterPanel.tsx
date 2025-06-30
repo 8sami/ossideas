@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Sliders, Check } from 'lucide-react';
 import { FilterOptions } from '../types';
 import { useCategories } from '../hooks/useCategories';
 import { useLicenses } from '../hooks/useLicenses';
 import { useIndustries } from '../hooks/useIndustries';
+import { useLocation } from 'react-router-dom';
 
 interface FilterPanelProps {
   filters: FilterOptions;
@@ -16,6 +17,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange, isOp
   const { categories, loading: categoriesLoading } = useCategories();
   const { licenses, loading: licensesLoading } = useLicenses();
   const { industries, loading: industriesLoading } = useIndustries();
+  const location = useLocation();
+
+  // Apply URL parameters to filters when component mounts or URL changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const categoryParam = searchParams.get('category');
+    
+    if (categoryParam && !filters.categories.includes(categoryParam)) {
+      const newFilters = { ...filters };
+      newFilters.categories = [categoryParam];
+      onFilterChange(newFilters);
+    }
+  }, [location.search]);
 
   const handleCategoryToggle = (category: string) => {
     const newCategories = filters.categories.includes(category)
