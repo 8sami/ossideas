@@ -118,8 +118,8 @@ const Header: React.FC<HeaderProps> = ({
     return null;
   };
 
-  // Determine if we should show search and filter (only on home page)
-  const showSearchAndFilter = location.pathname === '/';
+  // Determine if we should show search and filter (only on ideas page)
+  const showSearchAndFilter = location.pathname === '/ideas';
 
   const handleProfileClick = () => {
     navigate('/profile');
@@ -160,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* Search Bar - Desktop Only on home page */}
+            {/* Search Bar - Desktop Only on ideas page */}
             {showSearchAndFilter && (
               <div className="hidden md:flex flex-1 max-w-2xl mx-4 lg:mx-8">
                 <div className="relative w-full">
@@ -180,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Right side buttons */}
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              {/* Filter Button - Only show on home page */}
+              {/* Filter Button - Only show on ideas page */}
               {showSearchAndFilter && (
                 <button
                   onClick={onFilterToggle}
@@ -263,7 +263,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* Mobile Search Bar - Only show on home page and mobile */}
+      {/* Mobile Search Bar - Only show on ideas page and mobile */}
       {showSearchAndFilter && (
         <div className="md:hidden bg-white border-b border-gray-200 sticky top-16 z-40">
           <div className="ml-16 px-2 py-3">

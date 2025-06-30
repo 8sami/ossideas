@@ -139,9 +139,7 @@ const AppContent: React.FC = () => {
               element={
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Community</h1>
-                  <p className="text-gray-600">
-                    Community page coming soon...
-                  </p>
+                  <p className="text-gray-600">Community page coming soon...</p>
                 </div>
               }
             />
